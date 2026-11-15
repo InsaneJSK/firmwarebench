@@ -2,6 +2,16 @@
 
 FirmwareBench runs Inspect ReAct and smolagents ToolCallingAgent against the same embedded C repair tasks. Its dashboard links each comparison cell to a trial’s tool attempts, actual model route, candidate patch and independent verifier assertions.
 
+## Public demo and bring-your-own-provider runs
+
+[Open the evidence explorer](https://insanejsk.github.io/firmwarebench/) · [Pitch PDF](docs/pitch.pdf) · [Browser presentation](https://insanejsk.github.io/firmwarebench/pitch.html)
+
+The public demo is a static evidence explorer: compare the recorded Groq and Qwen experiments, inspect patches and reserved checks, and download the original JSON. It does not run new jobs or collect provider keys.
+
+FirmwareBench itself is a self-hosted benchmarking platform. Run the worker and isolated Docker verifier in your own environment, then connect your model provider through Bifrost. Hosted providers use your own API credentials (BYOK); local Ollama routes are supported too. The frontend uses HTML/CSS/JavaScript, the API uses FastAPI, and SQLite stores experiments and evidence.
+
+GitHub Pages serves the checked-in `docs/` directory from `main`. After changing the dashboard renderer or saved evidence, regenerate the static demo with `python scripts/build_demo.py`. The build copies only the selected public exports and frontend assets. Keep `.env`, reports, databases and runtime directories outside `docs/`.
+
 ## Open the saved experiment
 
 Install Python 3.11 and uv. From the root of this repository, run:
@@ -11,7 +21,7 @@ uv sync --locked --python 3.11
 uv run --locked python -m firmwarebench serve
 ```
 
-Open [the local dashboard](http://127.0.0.1:8765). **Saved benchmark** reads `examples/comparison.json`. Select a pass-count cell, choose a repetition and expand the timeline or verifier checks. **Export JSON** downloads all evidence. **Open export** opens a JSON file in the browser without uploading it. The saved view requires no provider key, Ollama or Docker. Open the seven-slide pitch in `docs/pitch.pdf`. The browser version in `docs/pitch.html` supports arrow keys and printing.
+Open [the local dashboard](http://127.0.0.1:8765). **Saved benchmark** reads `examples/comparison.json`. Select a pass-count cell, choose a repetition and expand the timeline or verifier checks. **Export JSON** downloads all evidence. **Open export** opens a JSON file in the browser without uploading it. The saved view requires no provider key, Ollama or Docker. Open the eight-slide pitch in `docs/pitch.pdf`. The browser version in `docs/pitch.html` supports arrow keys and printing.
 
 The included 3B experiment recorded 0/24 verified passes for each framework. Forty-five candidates changed the source. Bifrost recovered all 12 controlled outages. All 201 provider attempts were accounted for, with 319,690 reported tokens and zero estimated local provider fees. Cost per successful trial is undefined in this experiment.
 

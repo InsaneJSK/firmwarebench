@@ -4,10 +4,66 @@
 table{border-collapse:collapse;width:100%;margin:24px 0 4px;font-size:.83em;text-align:left}th,td{padding:16px 14px;border-bottom:1px solid #6c8277}th:first-child,td:first-child{padding-left:0}thead th{font-size:.75em;font-weight:650}thead span{font-weight:400}td.accent{color:#d3ebaa;font-weight:650}p.result-note{font-size:.68em;max-width:none;margin:14px 0}p.caveat{font-size:.62em;line-height:1.4;max-width:none;margin:10px 0 18px}.source{font-size:.43em;letter-spacing:.025em;text-transform:none}.compact{font-size:.79em;max-width:none;line-height:1.35;margin:14px 0}.results-slide h2{font-size:clamp(42px,5vw,72px)}.results-slide .big{margin:.35em 0}.results-slide .grid{gap:3vw}
 @media print{table{font-size:19pt;margin:18px 0 4px}th,td{padding:13px 12px}thead th{font-size:13pt}.results-slide h2{font-size:40pt}td.accent{color:#375640}p.result-note{font-size:14pt}p.caveat{font-size:13pt}.compact{font-size:17pt}.source{font-size:10pt}.results-slide .big{font-size:40pt}}
 @media(max-width:680px){table{font-size:.7em}th,td{padding:10px 5px}thead th{font-size:.8em}.source{font-size:.55em}}
+
+/* Architecture uses editable HTML text and connectors in the existing deck theme. */
+.architecture-slide{padding-top:5vh;padding-bottom:5vh}
+.architecture-slide h2{font-size:clamp(42px,5vw,72px);margin-bottom:.35em}
+.arch-lanes{display:grid;gap:0;margin:10px 0 12px}
+.arch-lane{display:grid;grid-template-columns:94px minmax(0,1fr);gap:16px;padding:20px 0;border-top:1px solid #6c8277;align-items:center}
+.arch-label{font:600 .52em/1.4 Consolas,monospace;color:#aac5b3;text-transform:uppercase;letter-spacing:.08em}
+.arch-flow{display:grid;grid-template-columns:1fr 22px 1fr 22px 1fr;gap:8px;align-items:center}
+.arch-flow.four{grid-template-columns:1.15fr 20px 1fr 20px .88fr 20px .86fr;gap:7px}
+.arch-node strong{display:block;font-size:.77em;font-weight:650;letter-spacing:-.025em;color:#d3ebaa;line-height:1.18}
+.arch-node span{display:block;font-size:.60em;line-height:1.35;margin-top:7px}
+.arch-arrow{font-size:1em;text-align:center;color:#aac5b3}
+.architecture-slide .arch-note{max-width:none;font-size:.63em;line-height:1.4;margin:10px 0 0}
+.architecture-slide .arch-note strong{font-weight:600}
+@media print{
+  @page{size:960pt 540pt;margin:0}
+  .architecture-slide{padding:42pt 7%}
+  .architecture-slide h2{font-size:39pt}
+  .arch-lane{grid-template-columns:69pt minmax(0,1fr);gap:12pt;padding:15pt 0}
+  .arch-label{font-size:11pt;color:#375640}
+  .arch-node strong{font-size:17pt;color:#375640}
+  .arch-node span{font-size:14pt;margin-top:5pt}
+  .arch-arrow{font-size:21pt;color:#375640}
+  .architecture-slide .arch-note{font-size:14pt;margin-top:8pt}
+}
+@media screen and (max-width:680px){
+  .arch-lane{grid-template-columns:1fr;gap:10px;padding:18px 0}
+  .arch-label{font-size:.70em}
+  .arch-flow,.arch-flow.four{grid-template-columns:1fr;gap:8px}
+  .arch-node strong{font-size:1.05em}.arch-node span{font-size:.88em;margin-top:3px}
+  .arch-arrow{transform:rotate(90deg);justify-self:start;line-height:1}
+  .architecture-slide .arch-note{font-size:.88em}
+}
 </style></head><body><main>
 <section><div class="scope">Geek Room · PS02 · Coding agents</div><h1>FirmwareBench</h1><p>Which coding agent can repair embedded C when a tool or model route fails?</p><small>Self-hosted prototype · Host-compiled firmware</small></section>
 <section><div class="scope">The decision</div><h2>Can a firmware team trust the patch?</h2><p>A telemetry parser can pass a whole-frame test and still lose samples when serial reads split a frame. A passing public test gives the reviewer only part of the evidence.</p><div class="grid"><div class="box"><h3>Two agents</h3><p>Inspect ReAct and smolagents ToolCallingAgent receive the same source, issue, tools and limits.</p></div><div class="box"><h3>Two tasks</h3><p>Recover partial UART frames or retain the newest four samples through ring-buffer wraparound.</p></div></div></section>
 <section><div class="scope">Experiment design</div><h2>Repeat each disruption</h2><div class="grid"><div class="box"><h3>Clean</h3><p>Measure baseline behavior on the standard route.</p></div><div class="box"><h3>Broken tool</h3><p>Fail the first public-test call and record whether the agent retries.</p></div><div class="box"><h3>Model outage</h3><p>Return a controlled HTTP 503 and follow the fallback through Bifrost.</p></div><div class="box"><h3>Misleading fixture</h3><p>Include an obsolete instruction that conflicts with the issue.</p></div></div></section>
+<section class="architecture-slide" id="architecture" aria-label="Technical architecture">
+<div class="scope">Scheduling, decisions and verification</div><h2>Technical architecture</h2>
+<div class="arch-lanes">
+<div class="arch-lane"><div class="arch-label">01<br>Schedule</div><div class="arch-flow">
+<div class="arch-node"><strong>Dashboard</strong><span>HTML / CSS / JavaScript</span></div><span class="arch-arrow" aria-hidden="true">→</span>
+<div class="arch-node"><strong>API + storage</strong><span>FastAPI + SQLite</span></div><span class="arch-arrow" aria-hidden="true">→</span>
+<div class="arch-node"><strong>One local worker</strong><span>Fresh workspace + process</span></div>
+</div></div>
+<div class="arch-lane"><div class="arch-label">02<br>Decide</div><div class="arch-flow four">
+<div class="arch-node"><strong>Agent process</strong><span>Inspect or smolagents</span></div><span class="arch-arrow" aria-hidden="true">↔</span>
+<div class="arch-node"><strong>Tool bridge</strong><span>Edits, tests and faults</span></div><span class="arch-arrow" aria-hidden="true">↔</span>
+<div class="arch-node"><strong>Bifrost</strong><span>Routing, logs, fallback</span></div><span class="arch-arrow" aria-hidden="true">↔</span>
+<div class="arch-node"><strong>Model</strong><span>Groq or Ollama</span></div>
+</div></div>
+<div class="arch-lane"><div class="arch-label">03<br>Verify</div><div class="arch-flow">
+<div class="arch-node"><strong>Final C source</strong><span>Collected by the worker</span></div><span class="arch-arrow" aria-hidden="true">→</span>
+<div class="arch-node"><strong>Docker + GCC</strong><span>Compile and execute locally</span></div><span class="arch-arrow" aria-hidden="true">→</span>
+<div class="arch-node"><strong>Host verifier</strong><span>Public + reserved assertions</span></div>
+</div></div>
+</div>
+<p class="arch-note"><strong>Evidence returns to SQLite:</strong> traces, patches and verdicts feed the dashboard and JSON export.</p>
+<p class="arch-note">Reserved expectations stay on the host. Firmware containers have no network access.</p>
+</section>
 <section><div class="scope">Verification</div><h2>Grade the final source independently</h2><p class="evidence">The host sends test inputs into an isolated GCC container and compares output with expectations held outside it.</p><div class="grid"><div class="box"><h3>Calibration</h3><p>On both tasks the starter fails, the complete repair passes, and a partial repair passes public tests while failing reserved cases.</p></div><div class="box"><h3>Evidence per trial</h3><p>Inspect the patch, individual assertions, time, tool attempts and provider-reported token usage.</p></div></div></section>
 <section class="results-slide"><div class="scope">Two saved 48-trial experiments</div><h2>Groq full benchmark</h2>
 <table aria-label="Verified passes over valid trials"><thead><tr><th>Agent</th><th>Qwen 3B<br><span>Passed / valid</span></th><th>Groq GPT-OSS-20B<br><span>Passed / valid</span></th><th>Groq<br><span>Invalid</span></th></tr></thead><tbody><tr><th scope="row">Inspect ReAct</th><td>0 / 24</td><td class="accent">3 / 23</td><td>1</td></tr><tr><th scope="row">smolagents</th><td>0 / 24</td><td class="accent">11 / 19</td><td>5</td></tr></tbody></table>
@@ -20,6 +76,6 @@ table{border-collapse:collapse;width:100%;margin:24px 0 4px;font-size:.83em;text
 <p class="result-note">5 passed, 3 failed, 0 invalid. All eight disruptions fired. The three ring-buffer failures remain in the evidence.</p>
 <p class="caveat">Later source-feedback and tool-protocol fixes. Six decisions, 12 tools and one repetition per case. This focused pilot does not replace the 48-trial benchmark or establish a reliable ranking.</p>
 <small class="source">Source: examples/groq-repair-pilot-v2.json</small></section>
-<section><div class="scope">Live demonstration</div><h2>Follow one decision to its test result</h2><ol><li>Open the full Groq export to compare clean and disrupted trials.</li><li>Open the focused pilot. Follow a passing UART repair from the fault to the patch and reserved checks.</li><li>Inspect a failed ring-buffer repair, then export the evidence for another reviewer.</li></ol><p>Next milestones are additional firmware tasks, CI regression checks, simulated peripherals and board measurements.</p><p><a href="http://127.0.0.1:8765">Open the local dashboard →</a></p></section></main><footer><button id="back" aria-label="Previous slide">←</button><button id="forward" aria-label="Next slide">→</button><button onclick="print()">Print / PDF</button></footer><script>
+<section><div class="scope">Prototype walkthrough</div><h2>Follow one decision to its test result</h2><ol><li>Open the full Groq export to compare clean and disrupted trials.</li><li>Open the focused pilot. Follow a passing UART repair from the fault to the patch and reserved checks.</li><li>Inspect a failed ring-buffer repair, then export the evidence for another reviewer.</li></ol><p>Explore recorded evidence in the public dashboard. Run new experiments in your own environment with your provider credentials through Bifrost.</p><p><a href="https://insanejsk.github.io/firmwarebench/">Open the evidence explorer →</a></p></section></main><footer><button id="back" aria-label="Previous slide">←</button><button id="forward" aria-label="Next slide">→</button><button onclick="print()">Print / PDF</button></footer><script>
 const slides=[...document.querySelectorAll('section')];function move(n){const index=slides.reduce((best,s,i)=>Math.abs(s.getBoundingClientRect().top)<Math.abs(slides[best].getBoundingClientRect().top)?i:best,0);slides[Math.max(0,Math.min(slides.length-1,index+n))].scrollIntoView();}document.getElementById('back').onclick=()=>move(-1);document.getElementById('forward').onclick=()=>move(1);document.onkeydown=e=>{if(e.key==='ArrowRight')move(1);if(e.key==='ArrowLeft')move(-1);};
 </script></body></html>
