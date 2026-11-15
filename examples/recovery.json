@@ -1,0 +1,1040 @@
+{
+  "schema": "firmwarebench.experiment.v1",
+  "id": "6e058a844ee04819a0447c809e1983dd",
+  "created": 1794593603.4383037,
+  "config": {
+    "title": "UART model outage \u00b7 Qwen2.5 7B",
+    "agents": [
+      "inspect",
+      "smolagents"
+    ],
+    "suite": "embedded-c/1",
+    "tasks": [
+      "uart"
+    ],
+    "scenarios": [
+      "model-outage"
+    ],
+    "route": "ollama/qwen2.5:7b",
+    "repeats": 1,
+    "turn_limit": 6,
+    "tool_limit": 12,
+    "seconds": 180
+  },
+  "trials": [
+    {
+      "id": "28359acac1e840a08a48aa31bd251945",
+      "experiment": "6e058a844ee04819a0447c809e1983dd",
+      "agent": "inspect",
+      "task": "uart",
+      "scenario": "model-outage",
+      "repetition": 1,
+      "queued": 1794593603.4383037,
+      "status": "failed",
+      "versions": {
+        "local_model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+        "suite": "embedded-c/1",
+        "task": "1.0.0",
+        "task_sha256": "e8229d17843a8cf0c258fb5a7b004e711553f38456bc0e9996c51653c1144c31",
+        "grader_sha256": "5efc2130a3638aa57bf2757a0bb758a01f73b25e27b252dc41f20f302b5a83aa",
+        "runner_sha256": "09639d69306680d7226cdd67a70bbbd42984a86f12fe548c00bcc94135cbfda1",
+        "gcc_image": "gcc:14.2.0-bookworm@sha256:b99b86a28812b1e6453a231a947dc43d76fe192788a12f344a9b568bf9f5d24c",
+        "gateway": "Bifrost v1.5.0 (bundled configuration)",
+        "inspect-ai": "0.3.200",
+        "smolagents": "1.22.0",
+        "python": "3.11.9",
+        "host": "Windows-10-10.0.26300-SP0"
+      },
+      "source": "#include \"firmware.h\"\n\nvoid feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n    p->used = 0;\n    for (unsigned i = 0; i < count; ++i) {\n        if (p->used == 0) {\nif (p->used == 0 && bytes[i] != 0xA5) continue;\nif (bytes[i] == 0xA5) p->used = 1;\n        } else {\nif (p->used == 2) { emit(p->payload[0], p->payload[1]); p->used = 0; }\n            if (++p->used == 3) {\n                emit(p->payload[0], p->payload[1]);\n                p->used = 0;\n            }\n        }\n    }\n}\n",
+      "diff": "--- starter/firmware.c\n+++ candidate/firmware.c\n@@ -4,9 +4,10 @@\n     p->used = 0;\n     for (unsigned i = 0; i < count; ++i) {\n         if (p->used == 0) {\n-            if (bytes[i] == 0xA5) p->used = 1;\n+if (p->used == 0 && bytes[i] != 0xA5) continue;\n+if (bytes[i] == 0xA5) p->used = 1;\n         } else {\n-            p->payload[p->used - 1] = bytes[i];\n+if (p->used == 2) { emit(p->payload[0], p->payload[1]); p->used = 0; }\n             if (++p->used == 3) {\n                 emit(p->payload[0], p->payload[1]);\n                 p->used = 0;\n",
+      "agent_seconds": 171.109,
+      "grader_seconds": 4.0,
+      "queue_seconds": 0.024969100952148438,
+      "triggered": true,
+      "verifier": {
+        "pass": false,
+        "assertions": [
+          {
+            "name": "compile",
+            "scope": "build",
+            "pass": true,
+            "detail": ""
+          },
+          {
+            "name": "whole frame",
+            "scope": "public",
+            "pass": false,
+            "expected": "3,9 |\n",
+            "actual": "0,0 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "split payload",
+            "scope": "public",
+            "pass": false,
+            "expected": "|\n3,9 |\n",
+            "actual": "|\n|\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "noise",
+            "scope": "public",
+            "pass": true,
+            "expected": "|\n",
+            "actual": "|\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "every byte split with idle reads",
+            "scope": "reserved",
+            "pass": false,
+            "expected": "|\n|\n|\n|\n5,6 |\n",
+            "actual": "|\n|\n|\n|\n|\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "sync in payload and adjacent frames",
+            "scope": "reserved",
+            "pass": false,
+            "expected": "165,165 0,255 |\n",
+            "actual": "0,0 0,0 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "adjacent split frames",
+            "scope": "reserved",
+            "pass": false,
+            "expected": "9,3 |\n0,5 |\n255,0 |\n",
+            "actual": "0,0 |\n|\n|\n",
+            "exit": 0,
+            "detail": ""
+          }
+        ]
+      },
+      "reason": "Decision-turn limit reached.",
+      "events": [
+        {
+          "kind": "decision",
+          "at": 5.966,
+          "data": {
+            "turn": 1,
+            "request_id": "19eb91e1-30e2-41ab-a97b-84c564782d0c",
+            "requested": "offline/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 63.564,
+          "data": {
+            "request_id": "19eb91e1-30e2-41ab-a97b-84c564782d0c",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 827,
+              "completion_tokens": 305,
+              "total_tokens": 1132
+            },
+            "response_id": "chatcmpl-265",
+            "tools_requested": [
+              "edit_line",
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 63.706,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 7,
+              "code": "if (p->used == 0 && bytes[i] != 0xA5) continue; if (bytes[i] == 0xA5) p->used = 1;"
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 65.898,
+          "data": {
+            "name": "run_public_tests",
+            "status": "failed",
+            "arguments": {},
+            "output": "{\"pass\": false, \"assertions\": [{\"name\": \"compile\", \"scope\": \"build\", \"pass\": false, \"detail\": \"firmware.c: In function 'feed':\\nfirmware.c:7:1: error: this 'if' clause does not guard... [-Werror=misleading-indentation]\\n    7 | if (p->used == 0 && bytes[i] != 0xA5) continue; if (bytes[i] == 0xA5) p->used = 1;\\n      | ^~\\nfirmware.c:7:49: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the 'if'\\n    7 | if (p->used == 0 && bytes[i] != 0xA5) continue; if (bytes[i] == 0xA5) p->used = 1;\\n      |                                                 ^~\\ncc1: all warnings being treated as errors\\n\"}]}"
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 65.929,
+          "data": {
+            "turn": 2,
+            "request_id": "c005e9b1-d42d-4c74-8e44-b05bcc71dd1a",
+            "requested": "ollama/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 84.903,
+          "data": {
+            "request_id": "c005e9b1-d42d-4c74-8e44-b05bcc71dd1a",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 1257,
+              "completion_tokens": 128,
+              "total_tokens": 1385
+            },
+            "response_id": "chatcmpl-126",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 84.94,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 7,
+              "code": "if (p->used == 0 && bytes[i] != 0xA5) continue;\nif (bytes[i] == 0xA5) p->used = 1;"
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 84.965,
+          "data": {
+            "turn": 3,
+            "request_id": "95800de6-f021-436b-8979-b4ce602919e6",
+            "requested": "ollama/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 95.689,
+          "data": {
+            "request_id": "95800de6-f021-436b-8979-b4ce602919e6",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 1343,
+              "completion_tokens": 71,
+              "total_tokens": 1414
+            },
+            "response_id": "chatcmpl-158",
+            "tools_requested": [
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 98.377,
+          "data": {
+            "name": "run_public_tests",
+            "status": "failed",
+            "arguments": {},
+            "output": "{\"pass\": false, \"assertions\": [{\"name\": \"compile\", \"scope\": \"build\", \"pass\": true, \"detail\": \"\"}, {\"name\": \"whole frame\", \"scope\": \"public\", \"pass\": true, \"expected\": \"3,9 |\\n\", \"actual\": \"3,9 |\\n\", \"exit\": 0, \"detail\": \"\"}, {\"name\": \"split payload\", \"scope\": \"public\", \"pass\": false, \"expected\": \"|\\n3,9 |\\n\", \"actual\": \"|\\n|\\n\", \"exit\": 0, \"detail\": \"\"}, {\"name\": \"noise\", \"scope\": \"public\", \"pass\": true, \"expected\": \"|\\n\", \"actual\": \"|\\n\", \"exit\": 0, \"detail\": \"\"}]}"
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 98.401,
+          "data": {
+            "turn": 4,
+            "request_id": "67f0d9b5-0501-4c53-b3ca-516cd4a0a0b5",
+            "requested": "ollama/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 126.13,
+          "data": {
+            "request_id": "67f0d9b5-0501-4c53-b3ca-516cd4a0a0b5",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 1588,
+              "completion_tokens": 197,
+              "total_tokens": 1785
+            },
+            "response_id": "chatcmpl-367",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 126.18,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 10,
+              "code": "if (++p->used == 2) { p->payload[p->used - 1] = bytes[i]; if (p->used == 3) { emit(p->payload[0], p->payload[1]); p->used = 0; } else { continue; } }"
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 126.21,
+          "data": {
+            "turn": 5,
+            "request_id": "d310eb59-1d54-42c5-baa2-d5d0d5e309bb",
+            "requested": "ollama/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 137.812,
+          "data": {
+            "request_id": "d310eb59-1d54-42c5-baa2-d5d0d5e309bb",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 1720,
+              "completion_tokens": 68,
+              "total_tokens": 1788
+            },
+            "response_id": "chatcmpl-410",
+            "tools_requested": [
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 140.475,
+          "data": {
+            "name": "run_public_tests",
+            "status": "failed",
+            "arguments": {},
+            "output": "{\"pass\": false, \"assertions\": [{\"name\": \"compile\", \"scope\": \"build\", \"pass\": true, \"detail\": \"\"}, {\"name\": \"whole frame\", \"scope\": \"public\", \"pass\": false, \"expected\": \"3,9 |\\n\", \"actual\": \"|\\n\", \"exit\": 0, \"detail\": \"\"}, {\"name\": \"split payload\", \"scope\": \"public\", \"pass\": false, \"expected\": \"|\\n3,9 |\\n\", \"actual\": \"|\\n|\\n\", \"exit\": 0, \"detail\": \"\"}, {\"name\": \"noise\", \"scope\": \"public\", \"pass\": true, \"expected\": \"|\\n\", \"actual\": \"|\\n\", \"exit\": 0, \"detail\": \"\"}]}"
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 140.498,
+          "data": {
+            "turn": 6,
+            "request_id": "33e88e3f-3524-49b8-8d98-848c35c57155",
+            "requested": "ollama/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 169.476,
+          "data": {
+            "request_id": "33e88e3f-3524-49b8-8d98-848c35c57155",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 1959,
+              "completion_tokens": 185,
+              "total_tokens": 2144
+            },
+            "response_id": "chatcmpl-890",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 169.513,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 10,
+              "code": "if (p->used == 2) { emit(p->payload[0], p->payload[1]); p->used = 0; }"
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 171.766,
+          "data": {
+            "id": "e3416725-3137-4ccf-9969-d3fc9bae7aaa",
+            "request_id": "19eb91e1-30e2-41ab-a97b-84c564782d0c",
+            "parent": null,
+            "provider": "offline",
+            "model": "qwen2.5:7b",
+            "status": "error",
+            "fallback": 0,
+            "retries": 0,
+            "usage": null,
+            "cost": null,
+            "http_status": 503,
+            "timestamp": "2026-11-13T18:13:29.438520562Z"
+          }
+        },
+        {
+          "kind": "fault",
+          "at": 171.774,
+          "data": {
+            "profile": "model-outage",
+            "request_id": "19eb91e1-30e2-41ab-a97b-84c564782d0c",
+            "evidence": "Controlled primary returned HTTP 503"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 171.782,
+          "data": {
+            "id": "5b6c177a-5546-4609-a250-71277219ed48",
+            "request_id": "19eb91e1-30e2-41ab-a97b-84c564782d0c",
+            "parent": "e3416725-3137-4ccf-9969-d3fc9bae7aaa",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 1,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 827,
+              "completion_tokens": 305,
+              "total_tokens": 1132
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:13:29.440126405Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 171.792,
+          "data": {
+            "id": "a42ece7e-f368-4f38-9b01-5e636740ed56",
+            "request_id": "c005e9b1-d42d-4c74-8e44-b05bcc71dd1a",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1257,
+              "completion_tokens": 128,
+              "total_tokens": 1385
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:14:29.424376265Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 171.799,
+          "data": {
+            "id": "d8f0c91e-13ba-4d63-96bb-bb37e51084ef",
+            "request_id": "95800de6-f021-436b-8979-b4ce602919e6",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1343,
+              "completion_tokens": 71,
+              "total_tokens": 1414
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:14:48.445416003Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 171.806,
+          "data": {
+            "id": "42f4b09d-386b-4c3b-aed2-74bf41cf2538",
+            "request_id": "67f0d9b5-0501-4c53-b3ca-516cd4a0a0b5",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1588,
+              "completion_tokens": 197,
+              "total_tokens": 1785
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:15:01.886395107Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 171.813,
+          "data": {
+            "id": "59ff414a-07c5-4ea6-91c2-b177f04ebb7e",
+            "request_id": "d310eb59-1d54-42c5-baa2-d5d0d5e309bb",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1720,
+              "completion_tokens": 68,
+              "total_tokens": 1788
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:15:29.706976795Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 171.818,
+          "data": {
+            "id": "db6b15bf-6656-4848-8882-361d7615f579",
+            "request_id": "33e88e3f-3524-49b8-8d98-848c35c57155",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1959,
+              "completion_tokens": 185,
+              "total_tokens": 2144
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:15:43.989678677Z"
+          }
+        }
+      ],
+      "metrics": {
+        "steps": 13,
+        "turns": 6,
+        "tool_calls": 7,
+        "shared_calls": 7,
+        "finish_calls": 0,
+        "failed_calls": 3,
+        "denied_calls": 0,
+        "provider_attempts": 7,
+        "usage_covered": 7,
+        "cost_covered": 7,
+        "known_tokens": 9648,
+        "tokens": 9648,
+        "known_cost": 0,
+        "cost": 0,
+        "cost_basis": "provider-reported or local-inference-fee-v1 (USD, excludes hosting and energy)",
+        "served": [
+          "ollama/qwen2.5:7b"
+        ],
+        "gateway_recovery": true
+      }
+    },
+    {
+      "id": "43f302bc6ea841e8b0cbc008f6198f89",
+      "experiment": "6e058a844ee04819a0447c809e1983dd",
+      "agent": "smolagents",
+      "task": "uart",
+      "scenario": "model-outage",
+      "repetition": 1,
+      "queued": 1794593603.4383037,
+      "status": "failed",
+      "versions": {
+        "local_model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+        "suite": "embedded-c/1",
+        "task": "1.0.0",
+        "task_sha256": "e8229d17843a8cf0c258fb5a7b004e711553f38456bc0e9996c51653c1144c31",
+        "grader_sha256": "5efc2130a3638aa57bf2757a0bb758a01f73b25e27b252dc41f20f302b5a83aa",
+        "runner_sha256": "09639d69306680d7226cdd67a70bbbd42984a86f12fe548c00bcc94135cbfda1",
+        "gcc_image": "gcc:14.2.0-bookworm@sha256:b99b86a28812b1e6453a231a947dc43d76fe192788a12f344a9b568bf9f5d24c",
+        "gateway": "Bifrost v1.5.0 (bundled configuration)",
+        "inspect-ai": "0.3.200",
+        "smolagents": "1.22.0",
+        "python": "3.11.9",
+        "host": "Windows-10-10.0.26300-SP0"
+      },
+      "source": "#include \"firmware.h\"\n\nvoid feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n    p->used = 0;\n    for (unsigned i = 0; i < count; ++i) {\n        if (p->used == 0) {\nif (bytes[i] == 0xA5 && !(i > 0 && bytes[i-1] == 0xA5)) p->used = 1;\n        } else {\n            p->payload[p->used - 1] = bytes[i];\n            if (++p->used == 3) {\n                emit(p->payload[0], p->payload[1]);\n                p->used = 0;\n            }\n        }\n    }\n}\n",
+      "diff": "--- starter/firmware.c\n+++ candidate/firmware.c\n@@ -4,7 +4,7 @@\n     p->used = 0;\n     for (unsigned i = 0; i < count; ++i) {\n         if (p->used == 0) {\n-            if (bytes[i] == 0xA5) p->used = 1;\n+if (bytes[i] == 0xA5 && !(i > 0 && bytes[i-1] == 0xA5)) p->used = 1;\n         } else {\n             p->payload[p->used - 1] = bytes[i];\n             if (++p->used == 3) {\n",
+      "agent_seconds": 39.39,
+      "grader_seconds": 3.593,
+      "queue_seconds": 175.87880301475525,
+      "triggered": true,
+      "verifier": {
+        "pass": false,
+        "assertions": [
+          {
+            "name": "compile",
+            "scope": "build",
+            "pass": true,
+            "detail": ""
+          },
+          {
+            "name": "whole frame",
+            "scope": "public",
+            "pass": true,
+            "expected": "3,9 |\n",
+            "actual": "3,9 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "split payload",
+            "scope": "public",
+            "pass": false,
+            "expected": "|\n3,9 |\n",
+            "actual": "|\n|\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "noise",
+            "scope": "public",
+            "pass": true,
+            "expected": "|\n",
+            "actual": "|\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "every byte split with idle reads",
+            "scope": "reserved",
+            "pass": false,
+            "expected": "|\n|\n|\n|\n5,6 |\n",
+            "actual": "|\n|\n|\n|\n|\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "sync in payload and adjacent frames",
+            "scope": "reserved",
+            "pass": false,
+            "expected": "165,165 0,255 |\n",
+            "actual": "165,165 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "adjacent split frames",
+            "scope": "reserved",
+            "pass": false,
+            "expected": "9,3 |\n0,5 |\n255,0 |\n",
+            "actual": "9,3 |\n|\n|\n",
+            "exit": 0,
+            "detail": ""
+          }
+        ]
+      },
+      "reason": "",
+      "events": [
+        {
+          "kind": "decision",
+          "at": 3.987,
+          "data": {
+            "turn": 1,
+            "request_id": "83afd2b9-54b1-4cf4-909e-c84951cb7128",
+            "requested": "offline/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 15.305,
+          "data": {
+            "request_id": "83afd2b9-54b1-4cf4-909e-c84951cb7128",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 1759,
+              "completion_tokens": 60,
+              "total_tokens": 1819
+            },
+            "response_id": "chatcmpl-568",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 15.346,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 7,
+              "code": "if (bytes[i] == 0xA5 && !(i > 0 && bytes[i-1] == 0xA5)) p->used = 1;"
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 15.39,
+          "data": {
+            "turn": 2,
+            "request_id": "aa8ff535-1814-4215-b641-e255e5ac88ff",
+            "requested": "ollama/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 18.086,
+          "data": {
+            "request_id": "aa8ff535-1814-4215-b641-e255e5ac88ff",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 1860,
+              "completion_tokens": 17,
+              "total_tokens": 1877
+            },
+            "response_id": "chatcmpl-351",
+            "tools_requested": [
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 20.848,
+          "data": {
+            "name": "run_public_tests",
+            "status": "failed",
+            "arguments": {},
+            "output": "{\"pass\": false, \"assertions\": [{\"name\": \"compile\", \"scope\": \"build\", \"pass\": true, \"detail\": \"\"}, {\"name\": \"whole frame\", \"scope\": \"public\", \"pass\": true, \"expected\": \"3,9 |\\n\", \"actual\": \"3,9 |\\n\", \"exit\": 0, \"detail\": \"\"}, {\"name\": \"split payload\", \"scope\": \"public\", \"pass\": false, \"expected\": \"|\\n3,9 |\\n\", \"actual\": \"|\\n|\\n\", \"exit\": 0, \"detail\": \"\"}, {\"name\": \"noise\", \"scope\": \"public\", \"pass\": true, \"expected\": \"|\\n\", \"actual\": \"|\\n\", \"exit\": 0, \"detail\": \"\"}]}"
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 20.882,
+          "data": {
+            "turn": 3,
+            "request_id": "34b95ce4-7a94-4b15-bca2-fe4ae38f09be",
+            "requested": "ollama/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 28.203,
+          "data": {
+            "request_id": "34b95ce4-7a94-4b15-bca2-fe4ae38f09be",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 2085,
+              "completion_tokens": 47,
+              "total_tokens": 2132
+            },
+            "response_id": "chatcmpl-48",
+            "tools_requested": []
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 28.22,
+          "data": {
+            "turn": 4,
+            "request_id": "7e314777-a58e-4033-8c1b-9aedfdfbc188",
+            "requested": "ollama/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 29.124,
+          "data": {
+            "request_id": "7e314777-a58e-4033-8c1b-9aedfdfbc188",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 2187,
+              "completion_tokens": 3,
+              "total_tokens": 2190
+            },
+            "response_id": "chatcmpl-208",
+            "tools_requested": []
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 29.157,
+          "data": {
+            "turn": 5,
+            "request_id": "3779d4d4-2208-4936-91cb-ba0be2ce2070",
+            "requested": "ollama/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 30.077,
+          "data": {
+            "request_id": "3779d4d4-2208-4936-91cb-ba0be2ce2070",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 2245,
+              "completion_tokens": 3,
+              "total_tokens": 2248
+            },
+            "response_id": "chatcmpl-146",
+            "tools_requested": []
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 30.115,
+          "data": {
+            "turn": 6,
+            "request_id": "b0848538-a13c-4de0-b416-c9587dbc0047",
+            "requested": "ollama/qwen2.5:7b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 39.174,
+          "data": {
+            "request_id": "b0848538-a13c-4de0-b416-c9587dbc0047",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "usage": {
+              "prompt_tokens": 2303,
+              "completion_tokens": 58,
+              "total_tokens": 2361
+            },
+            "response_id": "chatcmpl-564",
+            "tools_requested": []
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 42.635,
+          "data": {
+            "id": "6a645bc2-a381-4198-a83a-8b831fbffc50",
+            "request_id": "83afd2b9-54b1-4cf4-909e-c84951cb7128",
+            "parent": null,
+            "provider": "offline",
+            "model": "qwen2.5:7b",
+            "status": "error",
+            "fallback": 0,
+            "retries": 0,
+            "usage": null,
+            "cost": null,
+            "http_status": 503,
+            "timestamp": "2026-11-13T18:16:23.329650119Z"
+          }
+        },
+        {
+          "kind": "fault",
+          "at": 42.644,
+          "data": {
+            "profile": "model-outage",
+            "request_id": "83afd2b9-54b1-4cf4-909e-c84951cb7128",
+            "evidence": "Controlled primary returned HTTP 503"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 42.654,
+          "data": {
+            "id": "d652b7e5-dc6f-44ea-ad28-288e25798dd4",
+            "request_id": "83afd2b9-54b1-4cf4-909e-c84951cb7128",
+            "parent": "6a645bc2-a381-4198-a83a-8b831fbffc50",
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 1,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1759,
+              "completion_tokens": 60,
+              "total_tokens": 1819
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:16:23.339749634Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 42.663,
+          "data": {
+            "id": "cfeb3990-6060-4b2d-b316-a64584ae23d8",
+            "request_id": "aa8ff535-1814-4215-b641-e255e5ac88ff",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1860,
+              "completion_tokens": 17,
+              "total_tokens": 1877
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:16:34.727757896Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 42.674,
+          "data": {
+            "id": "32e5d2f1-7126-42eb-a619-ac6ef2a6e9eb",
+            "request_id": "34b95ce4-7a94-4b15-bca2-fe4ae38f09be",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 2085,
+              "completion_tokens": 47,
+              "total_tokens": 2132
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:16:40.231629Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 42.685,
+          "data": {
+            "id": "561782fe-6c04-496b-a700-8b035e34e0f8",
+            "request_id": "7e314777-a58e-4033-8c1b-9aedfdfbc188",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 2187,
+              "completion_tokens": 3,
+              "total_tokens": 2190
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:16:47.567030558Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 42.695,
+          "data": {
+            "id": "f65b87e2-0d70-43ff-8d60-e8dd1ac0374d",
+            "request_id": "3779d4d4-2208-4936-91cb-ba0be2ce2070",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 2245,
+              "completion_tokens": 3,
+              "total_tokens": 2248
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:16:48.493194701Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 42.706,
+          "data": {
+            "id": "9e470af0-c7da-46bc-a607-23095bbdf34f",
+            "request_id": "b0848538-a13c-4de0-b416-c9587dbc0047",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:7b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 2303,
+              "completion_tokens": 58,
+              "total_tokens": 2361
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:16:49.450176882Z"
+          }
+        }
+      ],
+      "metrics": {
+        "steps": 8,
+        "turns": 6,
+        "tool_calls": 2,
+        "shared_calls": 2,
+        "finish_calls": 0,
+        "failed_calls": 1,
+        "denied_calls": 0,
+        "provider_attempts": 7,
+        "usage_covered": 7,
+        "cost_covered": 7,
+        "known_tokens": 12627,
+        "tokens": 12627,
+        "known_cost": 0,
+        "cost": 0,
+        "cost_basis": "provider-reported or local-inference-fee-v1 (USD, excludes hosting and energy)",
+        "served": [
+          "ollama/qwen2.5:7b"
+        ],
+        "gateway_recovery": true
+      }
+    }
+  ],
+  "comparison": [
+    {
+      "agent": "inspect",
+      "task": "uart",
+      "scenario": "model-outage",
+      "scheduled": 1,
+      "valid": 1,
+      "passed": 0,
+      "invalid": 0,
+      "triggered": 1,
+      "recovered": 0,
+      "cost_per_success": null,
+      "cost_total": 0,
+      "mean_seconds": 171.109,
+      "ids": [
+        "28359acac1e840a08a48aa31bd251945"
+      ]
+    },
+    {
+      "agent": "smolagents",
+      "task": "uart",
+      "scenario": "model-outage",
+      "scheduled": 1,
+      "valid": 1,
+      "passed": 0,
+      "invalid": 0,
+      "triggered": 1,
+      "recovered": 0,
+      "cost_per_success": null,
+      "cost_total": 0,
+      "mean_seconds": 39.39,
+      "ids": [
+        "43f302bc6ea841e8b0cbc008f6198f89"
+      ]
+    }
+  ]
+}

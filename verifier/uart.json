@@ -1,0 +1,17 @@
+[
+  {
+    "name": "every byte split with idle reads",
+    "input": "a5\n\n05\n\n06\n",
+    "expected": "|\n|\n|\n|\n5,6 |\n"
+  },
+  {
+    "name": "sync in payload and adjacent frames",
+    "input": "ffa5a5a5a500ff\n",
+    "expected": "165,165 0,255 |\n"
+  },
+  {
+    "name": "adjacent split frames",
+    "input": "a50903a5\n0005a5ff\n00\n",
+    "expected": "9,3 |\n0,5 |\n255,0 |\n"
+  }
+]

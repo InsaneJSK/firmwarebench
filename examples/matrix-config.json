@@ -1,0 +1,23 @@
+{
+  "title": "Local firmware repair study",
+  "agents": [
+    "inspect",
+    "smolagents"
+  ],
+  "suite": "embedded-c/1",
+  "tasks": [
+    "uart",
+    "ring"
+  ],
+  "scenarios": [
+    "clean",
+    "broken-tool",
+    "model-outage",
+    "misleading-fixture"
+  ],
+  "route": "ollama/qwen2.5:3b",
+  "repeats": 3,
+  "turn_limit": 4,
+  "tool_limit": 8,
+  "seconds": 90
+}

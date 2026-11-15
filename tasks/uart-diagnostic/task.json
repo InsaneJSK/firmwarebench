@@ -1,0 +1,6 @@
+{
+  "name": "UART telemetry parser",
+  "version": "1.1.0",
+  "base": "uart",
+  "diagnostic": "Public reproduction from the starter: the caller zero-initializes Parser once. Calling feed with A5 03 leaves used=2. At entry to the next feed with byte 09 it is still 2, but immediately before the byte loop it has become 0. That discards the pending value. Preserve the caller's existing used value at each function entry. Whole-frame input and the in-loop end-of-frame reset already work. Keep the repair minimal."
+}

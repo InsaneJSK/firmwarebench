@@ -1,0 +1,807 @@
+{
+  "schema": "firmwarebench.experiment.v1",
+  "id": "0c25656d8ad2474e84c919798a51e41f",
+  "created": 1794598929.4883735,
+  "config": {
+    "title": "Groq GPT-OSS-20B \u00b7 UART model-outage pilot",
+    "agents": [
+      "inspect",
+      "smolagents"
+    ],
+    "suite": "embedded-c/1",
+    "tasks": [
+      "uart"
+    ],
+    "scenarios": [
+      "model-outage"
+    ],
+    "route": "groq/openai/gpt-oss-20b",
+    "repeats": 1,
+    "turn_limit": 4,
+    "tool_limit": 8,
+    "seconds": 300
+  },
+  "trials": [
+    {
+      "id": "7a6c61f7c060407eba1d1b0100d0363b",
+      "experiment": "0c25656d8ad2474e84c919798a51e41f",
+      "agent": "inspect",
+      "task": "uart",
+      "scenario": "model-outage",
+      "repetition": 1,
+      "queued": 1794598929.4883735,
+      "status": "failed",
+      "versions": {
+        "local_model_digest": null,
+        "suite": "embedded-c/1",
+        "task": "1.0.0",
+        "task_sha256": "e8229d17843a8cf0c258fb5a7b004e711553f38456bc0e9996c51653c1144c31",
+        "grader_sha256": "5efc2130a3638aa57bf2757a0bb758a01f73b25e27b252dc41f20f302b5a83aa",
+        "runner_sha256": "05b397ed7946f0f664c82ab2a8296462fc296875b4baf6ae1331dfeb516ee710",
+        "gcc_image": "gcc:14.2.0-bookworm@sha256:b99b86a28812b1e6453a231a947dc43d76fe192788a12f344a9b568bf9f5d24c",
+        "gateway": "Bifrost v1.5.0 (bundled configuration)",
+        "inspect-ai": "0.3.200",
+        "smolagents": "1.22.0",
+        "python": "3.11.9",
+        "host": "Windows-10-10.0.26300-SP0"
+      },
+      "source": "#include \"firmware.h\"\n\nvoid feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n        if (p->used == 0) {\n            if (bytes[i] == 0xA5) p->used = 1;\n        } else {\n            p->payload[p->used - 1] = bytes[i];\n            if (++p->used == 3) {\n                emit(p->payload[0], p->payload[1]);\n                p->used = 0;\n            }\n        }\n    }\n}\n",
+      "diff": "--- starter/firmware.c\n+++ candidate/firmware.c\n@@ -1,8 +1,6 @@\n #include \"firmware.h\"\n \n void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n-    p->used = 0;\n-    for (unsigned i = 0; i < count; ++i) {\n         if (p->used == 0) {\n             if (bytes[i] == 0xA5) p->used = 1;\n         } else {\n",
+      "agent_seconds": 104.219,
+      "grader_seconds": 2.031,
+      "queue_seconds": 0.010028362274169922,
+      "triggered": true,
+      "verifier": {
+        "pass": false,
+        "assertions": [
+          {
+            "name": "compile",
+            "scope": "build",
+            "pass": false,
+            "detail": "firmware.c: In function 'feed':\nfirmware.c:5:23: error: 'i' undeclared (first use in this function)\n    5 |             if (bytes[i] == 0xA5) p->used = 1;\n      |                       ^\nfirmware.c:5:23: note: each undeclared identifier is reported only once for each function it appears in\nfirmware.c:3:37: error: parameter 'bytes' set but not used [-Werror=unused-but-set-parameter]\n    3 | void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n      |                      ~~~~~~~~~~~~~~~^~~~~\nfirmware.c:3:53: error: unused parameter 'count' [-Werror=unused-parameter]\n    3 | void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n      |                                            ~~~~~~~~~^~~~~\nfirmware.c: At top level:\nfirmware.c:14:1: error: expected identifier or '(' before '}' token\n   14 | }\n      | ^\ncc1: all warnings being treated as errors\n"
+          }
+        ]
+      },
+      "reason": "Decision-turn limit reached.",
+      "events": [
+        {
+          "kind": "decision",
+          "at": 11.051,
+          "data": {
+            "turn": 1,
+            "request_id": "3b561640-9404-406f-8132-593aad874dd6",
+            "requested": "offline/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 11.971,
+          "data": {
+            "request_id": "3b561640-9404-406f-8132-593aad874dd6",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 768,
+              "completion_tokens": 234,
+              "completion_tokens_details": {
+                "reasoning_tokens": 207
+              },
+              "total_tokens": 1002
+            },
+            "response_id": "chatcmpl-1fef1bca-d92c-46e9-b202-0fb0bc05eb9e",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 12.24,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 4,
+              "code": ""
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 12.261,
+          "data": {
+            "turn": 2,
+            "request_id": "32a5fcd2-2846-434e-a60b-72fba3877436",
+            "requested": "groq/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 41.052,
+          "data": {
+            "request_id": "32a5fcd2-2846-434e-a60b-72fba3877436",
+            "seconds": 28.781
+          }
+        },
+        {
+          "kind": "response",
+          "at": 41.824,
+          "data": {
+            "request_id": "32a5fcd2-2846-434e-a60b-72fba3877436",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 802,
+              "completion_tokens": 285,
+              "completion_tokens_details": {
+                "reasoning_tokens": 261
+              },
+              "total_tokens": 1087
+            },
+            "response_id": "chatcmpl-4e581cde-306a-42e4-a113-b199bc3c18df",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 41.873,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 4,
+              "code": ""
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 41.9,
+          "data": {
+            "turn": 3,
+            "request_id": "4fdd7949-1435-4146-ba60-3072dc16cdd1",
+            "requested": "groq/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 71.05,
+          "data": {
+            "request_id": "4fdd7949-1435-4146-ba60-3072dc16cdd1",
+            "seconds": 29.14
+          }
+        },
+        {
+          "kind": "response",
+          "at": 71.667,
+          "data": {
+            "request_id": "4fdd7949-1435-4146-ba60-3072dc16cdd1",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 836,
+              "completion_tokens": 257,
+              "completion_tokens_details": {
+                "reasoning_tokens": 234
+              },
+              "total_tokens": 1093
+            },
+            "response_id": "chatcmpl-36065cb0-17aa-4f52-bcb4-75b13d0ecad8",
+            "tools_requested": [
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 71.719,
+          "data": {
+            "turn": 4,
+            "request_id": "5089de69-2cde-4ae6-ac76-c9a9348bb74d",
+            "requested": "groq/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 101.061,
+          "data": {
+            "request_id": "5089de69-2cde-4ae6-ac76-c9a9348bb74d",
+            "seconds": 29.328
+          }
+        },
+        {
+          "kind": "response",
+          "at": 101.383,
+          "data": {
+            "request_id": "5089de69-2cde-4ae6-ac76-c9a9348bb74d",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 885,
+              "completion_tokens": 32,
+              "completion_tokens_details": {
+                "reasoning_tokens": 12
+              },
+              "total_tokens": 917
+            },
+            "response_id": "chatcmpl-d8680895-ff0c-46f3-8620-965f3f252ac4",
+            "tools_requested": [
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 104.476,
+          "data": {
+            "id": "9b31c0ba-dfab-4269-9277-5c036ee0a055",
+            "request_id": "3b561640-9404-406f-8132-593aad874dd6",
+            "parent": null,
+            "provider": "offline",
+            "model": "openai/gpt-oss-20b",
+            "status": "error",
+            "fallback": 0,
+            "retries": 0,
+            "usage": null,
+            "cost": null,
+            "http_status": 503,
+            "timestamp": "2026-11-13T19:42:20.581137031Z"
+          }
+        },
+        {
+          "kind": "fault",
+          "at": 104.485,
+          "data": {
+            "profile": "model-outage",
+            "request_id": "3b561640-9404-406f-8132-593aad874dd6",
+            "evidence": "Controlled primary returned HTTP 503"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 104.495,
+          "data": {
+            "id": "231a5d9f-aecb-4d48-bad3-ef1275b9cda9",
+            "request_id": "3b561640-9404-406f-8132-593aad874dd6",
+            "parent": "9b31c0ba-dfab-4269-9277-5c036ee0a055",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 1,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 768,
+              "completion_tokens": 234,
+              "completion_tokens_details": {
+                "reasoning_tokens": 207
+              },
+              "total_tokens": 1002
+            },
+            "cost": 0.0001278,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:42:20.585803756Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 104.505,
+          "data": {
+            "id": "706ffec4-6488-461b-929b-af6cf02d0c66",
+            "request_id": "32a5fcd2-2846-434e-a60b-72fba3877436",
+            "parent": null,
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 802,
+              "completion_tokens": 285,
+              "completion_tokens_details": {
+                "reasoning_tokens": 261
+              },
+              "total_tokens": 1087
+            },
+            "cost": 0.00014565,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:42:50.564644162Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 104.514,
+          "data": {
+            "id": "407c0f6c-ac54-4703-a55d-25d9ba16fe39",
+            "request_id": "4fdd7949-1435-4146-ba60-3072dc16cdd1",
+            "parent": null,
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 836,
+              "completion_tokens": 257,
+              "completion_tokens_details": {
+                "reasoning_tokens": 234
+              },
+              "total_tokens": 1093
+            },
+            "cost": 0.00013979999999999998,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:43:20.570559764Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 104.524,
+          "data": {
+            "id": "a7501f07-d988-43ae-aef2-b4b02a882122",
+            "request_id": "5089de69-2cde-4ae6-ac76-c9a9348bb74d",
+            "parent": null,
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 885,
+              "completion_tokens": 32,
+              "completion_tokens_details": {
+                "reasoning_tokens": 12
+              },
+              "total_tokens": 917
+            },
+            "cost": 7.5975e-05,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:43:50.58214788Z"
+          }
+        }
+      ],
+      "metrics": {
+        "steps": 6,
+        "turns": 4,
+        "tool_calls": 2,
+        "shared_calls": 2,
+        "finish_calls": 0,
+        "failed_calls": 0,
+        "denied_calls": 0,
+        "provider_attempts": 5,
+        "usage_covered": 5,
+        "cost_covered": 5,
+        "known_tokens": 4099,
+        "tokens": 4099,
+        "known_cost": 0.0004892249999999999,
+        "cost": 0.0004892249999999999,
+        "cost_basis": "provider-reported or local-inference-fee-v1 (USD, excludes hosting and energy)",
+        "served": [
+          "groq/openai/gpt-oss-20b"
+        ],
+        "gateway_recovery": true
+      }
+    },
+    {
+      "id": "605d56b099bf4816b1faedb01ffb46ba",
+      "experiment": "0c25656d8ad2474e84c919798a51e41f",
+      "agent": "smolagents",
+      "task": "uart",
+      "scenario": "model-outage",
+      "repetition": 1,
+      "queued": 1794598929.4883735,
+      "status": "failed",
+      "versions": {
+        "local_model_digest": null,
+        "suite": "embedded-c/1",
+        "task": "1.0.0",
+        "task_sha256": "e8229d17843a8cf0c258fb5a7b004e711553f38456bc0e9996c51653c1144c31",
+        "grader_sha256": "5efc2130a3638aa57bf2757a0bb758a01f73b25e27b252dc41f20f302b5a83aa",
+        "runner_sha256": "05b397ed7946f0f664c82ab2a8296462fc296875b4baf6ae1331dfeb516ee710",
+        "gcc_image": "gcc:14.2.0-bookworm@sha256:b99b86a28812b1e6453a231a947dc43d76fe192788a12f344a9b568bf9f5d24c",
+        "gateway": "Bifrost v1.5.0 (bundled configuration)",
+        "inspect-ai": "0.3.200",
+        "smolagents": "1.22.0",
+        "python": "3.11.9",
+        "host": "Windows-10-10.0.26300-SP0"
+      },
+      "source": "#include \"firmware.h\"\n\nvoid feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n            if (bytes[i] == 0xA5) p->used = 1;\n        } else {\n            p->payload[p->used - 1] = bytes[i];\n            if (++p->used == 3) {\n                emit(p->payload[0], p->payload[1]);\n                p->used = 0;\n            }\n        }\n    }\n}\n",
+      "diff": "--- starter/firmware.c\n+++ candidate/firmware.c\n@@ -1,9 +1,6 @@\n #include \"firmware.h\"\n \n void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n-    p->used = 0;\n-    for (unsigned i = 0; i < count; ++i) {\n-        if (p->used == 0) {\n             if (bytes[i] == 0xA5) p->used = 1;\n         } else {\n             p->payload[p->used - 1] = bytes[i];\n",
+      "agent_seconds": 115.516,
+      "grader_seconds": 1.938,
+      "queue_seconds": 106.61068868637085,
+      "triggered": true,
+      "verifier": {
+        "pass": false,
+        "assertions": [
+          {
+            "name": "compile",
+            "scope": "build",
+            "pass": false,
+            "detail": "firmware.c: In function 'feed':\nfirmware.c:4:23: error: 'i' undeclared (first use in this function)\n    4 |             if (bytes[i] == 0xA5) p->used = 1;\n      |                       ^\nfirmware.c:4:23: note: each undeclared identifier is reported only once for each function it appears in\nfirmware.c:3:37: error: parameter 'bytes' set but not used [-Werror=unused-but-set-parameter]\n    3 | void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n      |                      ~~~~~~~~~~~~~~~^~~~~\nfirmware.c:3:53: error: unused parameter 'count' [-Werror=unused-parameter]\n    3 | void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n      |                                            ~~~~~~~~~^~~~~\nfirmware.c:3:65: error: unused parameter 'emit' [-Werror=unused-parameter]\n    3 | void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n      |                                                            ~~~~~^~~~\nfirmware.c: At top level:\nfirmware.c:5:11: error: expected identifier or '(' before 'else'\n    5 |         } else {\n      |           ^~~~\nfirmware.c:12:5: error: expected identifier or '(' before '}' token\n   12 |     }\n      |     ^\nfirmware.c:13:1: error: expected identifier or '(' before '}' token\n   13 | }\n      | ^\ncc1: all warnings being treated as errors\n"
+          }
+        ]
+      },
+      "reason": "",
+      "events": [
+        {
+          "kind": "decision",
+          "at": 4.491,
+          "data": {
+            "turn": 1,
+            "request_id": "810eda1b-ba0f-4984-bee6-385049136987",
+            "requested": "offline/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 24.455,
+          "data": {
+            "request_id": "810eda1b-ba0f-4984-bee6-385049136987",
+            "seconds": 19.953
+          }
+        },
+        {
+          "kind": "response",
+          "at": 25.191,
+          "data": {
+            "request_id": "810eda1b-ba0f-4984-bee6-385049136987",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 1637,
+              "completion_tokens": 190,
+              "completion_tokens_details": {
+                "reasoning_tokens": 163
+              },
+              "total_tokens": 1827
+            },
+            "response_id": "chatcmpl-4e9ed70d-476f-4446-8b9c-f9812ba365d0",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 25.227,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 4,
+              "code": ""
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 25.26,
+          "data": {
+            "turn": 2,
+            "request_id": "b0285b23-bca5-468e-87e5-f2e656cc45fd",
+            "requested": "groq/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 54.458,
+          "data": {
+            "request_id": "b0285b23-bca5-468e-87e5-f2e656cc45fd",
+            "seconds": 29.187
+          }
+        },
+        {
+          "kind": "response",
+          "at": 54.988,
+          "data": {
+            "request_id": "b0285b23-bca5-468e-87e5-f2e656cc45fd",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 1714,
+              "completion_tokens": 132,
+              "completion_tokens_details": {
+                "reasoning_tokens": 105
+              },
+              "total_tokens": 1846
+            },
+            "response_id": "chatcmpl-6a2dfa76-0f83-43ed-a347-c2f17e4ddc8e",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 55.036,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 4,
+              "code": ""
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 55.078,
+          "data": {
+            "turn": 3,
+            "request_id": "660c177e-7ebc-4c28-92b4-6ccf5837cc13",
+            "requested": "groq/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 84.452,
+          "data": {
+            "request_id": "660c177e-7ebc-4c28-92b4-6ccf5837cc13",
+            "seconds": 29.359
+          }
+        },
+        {
+          "kind": "response",
+          "at": 85.197,
+          "data": {
+            "request_id": "660c177e-7ebc-4c28-92b4-6ccf5837cc13",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 1792,
+              "completion_tokens": 164,
+              "completion_tokens_details": {
+                "reasoning_tokens": 134
+              },
+              "total_tokens": 1956
+            },
+            "response_id": "chatcmpl-a2b5e0a5-9fdd-412f-800f-6a7f324488ed",
+            "tools_requested": [
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 85.226,
+          "data": {
+            "turn": 4,
+            "request_id": "d577b299-13ea-4909-ac1c-c2fe38a13e0f",
+            "requested": "groq/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 114.46,
+          "data": {
+            "request_id": "d577b299-13ea-4909-ac1c-c2fe38a13e0f",
+            "seconds": 29.218
+          }
+        },
+        {
+          "kind": "response",
+          "at": 115.299,
+          "data": {
+            "request_id": "d577b299-13ea-4909-ac1c-c2fe38a13e0f",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 1831,
+              "completion_tokens": 202,
+              "completion_tokens_details": {
+                "reasoning_tokens": 175
+              },
+              "total_tokens": 2033
+            },
+            "response_id": "chatcmpl-491bf90b-fe02-4785-9d47-c38d1a9f24bb",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 115.308,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 4,
+              "code": ""
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 118.486,
+          "data": {
+            "id": "f8ab15d3-1f20-485b-950a-5ac51102985e",
+            "request_id": "810eda1b-ba0f-4984-bee6-385049136987",
+            "parent": null,
+            "provider": "offline",
+            "model": "openai/gpt-oss-20b",
+            "status": "error",
+            "fallback": 0,
+            "retries": 0,
+            "usage": null,
+            "cost": null,
+            "http_status": 503,
+            "timestamp": "2026-11-13T19:44:20.569526766Z"
+          }
+        },
+        {
+          "kind": "fault",
+          "at": 118.494,
+          "data": {
+            "profile": "model-outage",
+            "request_id": "810eda1b-ba0f-4984-bee6-385049136987",
+            "evidence": "Controlled primary returned HTTP 503"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 118.501,
+          "data": {
+            "id": "0bc992f3-a8bd-4dcd-aa2b-1ded4c898f24",
+            "request_id": "810eda1b-ba0f-4984-bee6-385049136987",
+            "parent": "f8ab15d3-1f20-485b-950a-5ac51102985e",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 1,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1637,
+              "completion_tokens": 190,
+              "completion_tokens_details": {
+                "reasoning_tokens": 163
+              },
+              "total_tokens": 1827
+            },
+            "cost": 0.000179775,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:44:20.571534882Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 118.509,
+          "data": {
+            "id": "d1861d6a-9770-44ab-8b94-fb4b991a9d0b",
+            "request_id": "b0285b23-bca5-468e-87e5-f2e656cc45fd",
+            "parent": null,
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1714,
+              "completion_tokens": 132,
+              "completion_tokens_details": {
+                "reasoning_tokens": 105
+              },
+              "total_tokens": 1846
+            },
+            "cost": 0.00016815,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:44:50.577826739Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 118.517,
+          "data": {
+            "id": "e22f1c51-702e-4038-82c7-acc29d08e747",
+            "request_id": "660c177e-7ebc-4c28-92b4-6ccf5837cc13",
+            "parent": null,
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1792,
+              "completion_tokens": 164,
+              "completion_tokens_details": {
+                "reasoning_tokens": 134
+              },
+              "total_tokens": 1956
+            },
+            "cost": 0.0001836,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:45:20.573776395Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 118.524,
+          "data": {
+            "id": "6bc8a811-7ee2-428d-9778-7bc4303aff9c",
+            "request_id": "d577b299-13ea-4909-ac1c-c2fe38a13e0f",
+            "parent": null,
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1831,
+              "completion_tokens": 202,
+              "completion_tokens_details": {
+                "reasoning_tokens": 175
+              },
+              "total_tokens": 2033
+            },
+            "cost": 0.000197925,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:45:50.567024339Z"
+          }
+        }
+      ],
+      "metrics": {
+        "steps": 7,
+        "turns": 4,
+        "tool_calls": 3,
+        "shared_calls": 3,
+        "finish_calls": 0,
+        "failed_calls": 0,
+        "denied_calls": 0,
+        "provider_attempts": 5,
+        "usage_covered": 5,
+        "cost_covered": 5,
+        "known_tokens": 7662,
+        "tokens": 7662,
+        "known_cost": 0.00072945,
+        "cost": 0.00072945,
+        "cost_basis": "provider-reported or local-inference-fee-v1 (USD, excludes hosting and energy)",
+        "served": [
+          "groq/openai/gpt-oss-20b"
+        ],
+        "gateway_recovery": true
+      }
+    }
+  ],
+  "comparison": [
+    {
+      "agent": "inspect",
+      "task": "uart",
+      "scenario": "model-outage",
+      "scheduled": 1,
+      "valid": 1,
+      "passed": 0,
+      "invalid": 0,
+      "triggered": 1,
+      "recovered": 0,
+      "cost_per_success": null,
+      "cost_total": 0.0004892249999999999,
+      "mean_seconds": 104.219,
+      "ids": [
+        "7a6c61f7c060407eba1d1b0100d0363b"
+      ]
+    },
+    {
+      "agent": "smolagents",
+      "task": "uart",
+      "scenario": "model-outage",
+      "scheduled": 1,
+      "valid": 1,
+      "passed": 0,
+      "invalid": 0,
+      "triggered": 1,
+      "recovered": 0,
+      "cost_per_success": null,
+      "cost_total": 0.00072945,
+      "mean_seconds": 115.516,
+      "ids": [
+        "605d56b099bf4816b1faedb01ffb46ba"
+      ]
+    }
+  ]
+}

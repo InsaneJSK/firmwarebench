@@ -1,0 +1,19 @@
+name: firmwarebench
+services:
+  bifrost:
+    image: maximhq/bifrost:v1.5.0@sha256:42d73fff0e8296f8f2f852904ce36351242847f0ccc8ffa8ddcbeb9026f36f29
+    ports:
+      - "127.0.0.1:14808:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - bifrost-data:/app/data
+      - ./gateway/config.json:/app/data/config.json:ro
+    depends_on:
+      - offline
+  offline:
+    image: caddy:2-alpine@sha256:6aeddd44c3078b0f9a35206472a11420648a79c184603ef95957d0a20044cb2b
+    command: ["caddy", "respond", "--listen", ":8080", "--status", "503", "--body", "Controlled FirmwareBench provider outage"]
+volumes:
+  bifrost-data:
+

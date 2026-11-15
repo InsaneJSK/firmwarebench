@@ -1,0 +1,18 @@
+{
+  "name": "Telemetry ring buffer",
+  "version": "1.0.0",
+  "issue": "Keep the newest four samples. On a full buffer, overwrite the oldest entry. Dequeue in FIFO order and return -1 on empty. The head, tail and count must stay correct through repeated wraparound. Keep the existing API.",
+  "obsolete": "Legacy bench note: when full, discard the incoming sample and retain old entries.",
+  "public": [
+    {
+      "name": "FIFO and empty",
+      "input": "+7\n+9\n-\n-\n-\n",
+      "expected": "7\n9\n-1\n"
+    },
+    {
+      "name": "one overflow",
+      "input": "+1\n+2\n+3\n+4\n+5\n-\n",
+      "expected": "2\n"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Groq source-feedback repair pilot",
+  "agents": [
+    "inspect",
+    "smolagents"
+  ],
+  "suite": "embedded-c/1",
+  "tasks": [
+    "uart",
+    "ring"
+  ],
+  "scenarios": [
+    "broken-tool",
+    "model-outage"
+  ],
+  "route": "groq/openai/gpt-oss-20b",
+  "repeats": 1,
+  "turn_limit": 6,
+  "tool_limit": 12,
+  "seconds": 300,
+  "show_edit_feedback": true
+}

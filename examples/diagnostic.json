@@ -1,0 +1,824 @@
+{
+  "schema": "firmwarebench.experiment.v1",
+  "id": "872775bdc32a4fc480a9c6a16332d224",
+  "created": 1794593926.801586,
+  "config": {
+    "title": "UART split-read diagnostic \u00b7 v1.1",
+    "agents": [
+      "inspect",
+      "smolagents"
+    ],
+    "suite": "embedded-c/1.1",
+    "tasks": [
+      "uart"
+    ],
+    "scenarios": [
+      "model-outage"
+    ],
+    "route": "ollama/qwen2.5:3b",
+    "repeats": 1,
+    "turn_limit": 5,
+    "tool_limit": 10,
+    "seconds": 120
+  },
+  "trials": [
+    {
+      "id": "95a32b007c674490b7ff425cd4644df9",
+      "experiment": "872775bdc32a4fc480a9c6a16332d224",
+      "agent": "inspect",
+      "task": "uart",
+      "scenario": "model-outage",
+      "repetition": 1,
+      "queued": 1794593926.801586,
+      "status": "failed",
+      "versions": {
+        "local_model_digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+        "suite": "embedded-c/1.1",
+        "task": "1.1.0",
+        "task_sha256": "da1dbaf274017105c26b539d80ebc4e9758cd7491bc6bb896de8e0a2cdf83205",
+        "grader_sha256": "5efc2130a3638aa57bf2757a0bb758a01f73b25e27b252dc41f20f302b5a83aa",
+        "runner_sha256": "4f95fcb1ffa20907ccb3026ede2cab6b3c423dd3d6a48d27a49ad56c3e027ebd",
+        "gcc_image": "gcc:14.2.0-bookworm@sha256:b99b86a28812b1e6453a231a947dc43d76fe192788a12f344a9b568bf9f5d24c",
+        "gateway": "Bifrost v1.5.0 (bundled configuration)",
+        "inspect-ai": "0.3.200",
+        "smolagents": "1.22.0",
+        "python": "3.11.9",
+        "host": "Windows-10-10.0.26300-SP0"
+      },
+      "source": "#include \"firmware.h\"\n\nvoid feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n    p->used = 0;\n    for (unsigned i = 0; i < count; ++i) {\nif (p->used == 0 && bytes[i] == 0xA5) { p->used = 1; } else { p->payload[p->used - 1] = bytes[i]; if (++p->used == 3) { emit(p->payload[0], p->payload[1]); p->used = 0; } }\n            if (bytes[i] == 0xA5) p->used = 1;\n        } else {\n            p->payload[p->used - 1] = bytes[i];\n            if (++p->used == 3) {\n                emit(p->payload[0], p->payload[1]);\n                p->used = 0;\n            }\n        }\n    }\n}\n",
+      "diff": "--- starter/firmware.c\n+++ candidate/firmware.c\n@@ -3,7 +3,7 @@\n void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n     p->used = 0;\n     for (unsigned i = 0; i < count; ++i) {\n-        if (p->used == 0) {\n+if (p->used == 0 && bytes[i] == 0xA5) { p->used = 1; } else { p->payload[p->used - 1] = bytes[i]; if (++p->used == 3) { emit(p->payload[0], p->payload[1]); p->used = 0; } }\n             if (bytes[i] == 0xA5) p->used = 1;\n         } else {\n             p->payload[p->used - 1] = bytes[i];\n",
+      "agent_seconds": 56.437,
+      "grader_seconds": 1.75,
+      "queue_seconds": 0.018717527389526367,
+      "triggered": true,
+      "verifier": {
+        "pass": false,
+        "assertions": [
+          {
+            "name": "compile",
+            "scope": "build",
+            "pass": false,
+            "detail": "firmware.c: In function 'feed':\nfirmware.c:8:11: error: 'else' without a previous 'if'\n    8 |         } else {\n      |           ^~~~\nfirmware.c:9:45: error: 'i' undeclared (first use in this function)\n    9 |             p->payload[p->used - 1] = bytes[i];\n      |                                             ^\nfirmware.c:9:45: note: each undeclared identifier is reported only once for each function it appears in\nfirmware.c: At top level:\nfirmware.c:16:1: error: expected identifier or '(' before '}' token\n   16 | }\n      | ^\n"
+          }
+        ]
+      },
+      "reason": "Decision-turn limit reached.",
+      "events": [
+        {
+          "kind": "decision",
+          "at": 9.896,
+          "data": {
+            "turn": 1,
+            "request_id": "a5dc17bd-125d-40a1-a8d7-15893e4c8047",
+            "requested": "offline/qwen2.5:3b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 25.599,
+          "data": {
+            "request_id": "a5dc17bd-125d-40a1-a8d7-15893e4c8047",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "usage": {
+              "prompt_tokens": 925,
+              "completion_tokens": 326,
+              "total_tokens": 1251
+            },
+            "response_id": "chatcmpl-299",
+            "tools_requested": [
+              "edit_line",
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 25.85,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 6,
+              "code": "if (p->used == 0 && bytes[i] == 0xA5) p->used = 1; else if (p->used > 0) { p->payload[p->used - 1] = bytes[i]; ++p->used; }"
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 27.948,
+          "data": {
+            "name": "run_public_tests",
+            "status": "failed",
+            "arguments": {},
+            "output": "{\"pass\": false, \"assertions\": [{\"name\": \"compile\", \"scope\": \"build\", \"pass\": false, \"detail\": \"firmware.c: In function 'feed':\\nfirmware.c:8:11: error: 'else' without a previous 'if'\\n    8 |         } else {\\n      |           ^~~~\\nfirmware.c:9:45: error: 'i' undeclared (first use in this function)\\n    9 |             p->payload[p->used - 1] = bytes[i];\\n      |                                             ^\\nfirmware.c:9:45: note: each undeclared identifier is reported only once for each function it appears in\\nfirmware.c: At top level:\\nfirmware.c:16:1: error: expected identifier or '(' before '}' token\\n   16 | }\\n      | ^\\n\"}]}"
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 27.972,
+          "data": {
+            "turn": 2,
+            "request_id": "68507ad1-6198-409e-926a-ad8216b46b2e",
+            "requested": "ollama/qwen2.5:3b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 34.016,
+          "data": {
+            "request_id": "68507ad1-6198-409e-926a-ad8216b46b2e",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "usage": {
+              "prompt_tokens": 1311,
+              "completion_tokens": 317,
+              "total_tokens": 1628
+            },
+            "response_id": "chatcmpl-786",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 34.06,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 6,
+              "code": "if (p->used == 0 && bytes[i] == 0xA5) p->used = 1;"
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 34.088,
+          "data": {
+            "turn": 3,
+            "request_id": "1f94f798-72d8-4f9c-9618-027879f859d0",
+            "requested": "ollama/qwen2.5:3b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 36.894,
+          "data": {
+            "request_id": "1f94f798-72d8-4f9c-9618-027879f859d0",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "usage": {
+              "prompt_tokens": 1545,
+              "completion_tokens": 131,
+              "total_tokens": 1676
+            },
+            "response_id": "chatcmpl-457",
+            "tools_requested": [
+              "edit_line",
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 36.955,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 6,
+              "code": "if (p->used == 0 && bytes[i] == 0xA5) p->used = 1;"
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 38.723,
+          "data": {
+            "name": "run_public_tests",
+            "status": "failed",
+            "arguments": {},
+            "output": "{\"pass\": false, \"assertions\": [{\"name\": \"compile\", \"scope\": \"build\", \"pass\": false, \"detail\": \"firmware.c: In function 'feed':\\nfirmware.c:8:11: error: 'else' without a previous 'if'\\n    8 |         } else {\\n      |           ^~~~\\nfirmware.c:9:45: error: 'i' undeclared (first use in this function)\\n    9 |             p->payload[p->used - 1] = bytes[i];\\n      |                                             ^\\nfirmware.c:9:45: note: each undeclared identifier is reported only once for each function it appears in\\nfirmware.c: At top level:\\nfirmware.c:16:1: error: expected identifier or '(' before '}' token\\n   16 | }\\n      | ^\\n\"}]}"
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 38.739,
+          "data": {
+            "turn": 4,
+            "request_id": "8ddba314-dc7d-43dc-ac81-76ff44970bf5",
+            "requested": "ollama/qwen2.5:3b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 48.283,
+          "data": {
+            "request_id": "8ddba314-dc7d-43dc-ac81-76ff44970bf5",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "usage": {
+              "prompt_tokens": 1834,
+              "completion_tokens": 472,
+              "total_tokens": 2306
+            },
+            "response_id": "chatcmpl-989",
+            "tools_requested": [
+              "edit_line",
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 48.303,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 6,
+              "code": "if (p->used == 0 && bytes[i] == 0xA5) { p->used = 1; } else { p->payload[p->used - 1] = bytes[i]; if (++p->used == 3) { emit(p->payload[0], p->payload[1]); p->used = 0; } }"
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 50.083,
+          "data": {
+            "name": "run_public_tests",
+            "status": "failed",
+            "arguments": {},
+            "output": "{\"pass\": false, \"assertions\": [{\"name\": \"compile\", \"scope\": \"build\", \"pass\": false, \"detail\": \"firmware.c: In function 'feed':\\nfirmware.c:8:11: error: 'else' without a previous 'if'\\n    8 |         } else {\\n      |           ^~~~\\nfirmware.c:9:45: error: 'i' undeclared (first use in this function)\\n    9 |             p->payload[p->used - 1] = bytes[i];\\n      |                                             ^\\nfirmware.c:9:45: note: each undeclared identifier is reported only once for each function it appears in\\nfirmware.c: At top level:\\nfirmware.c:16:1: error: expected identifier or '(' before '}' token\\n   16 | }\\n      | ^\\n\"}]}"
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 50.106,
+          "data": {
+            "turn": 5,
+            "request_id": "2eb79bc6-d03a-4280-a016-af958aa72e2f",
+            "requested": "ollama/qwen2.5:3b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 54.68,
+          "data": {
+            "request_id": "2eb79bc6-d03a-4280-a016-af958aa72e2f",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "usage": {
+              "prompt_tokens": 2323,
+              "completion_tokens": 198,
+              "total_tokens": 2521
+            },
+            "response_id": "chatcmpl-335",
+            "tools_requested": []
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 57.418,
+          "data": {
+            "id": "d7211ee2-497d-4aea-b2ab-4508d4f8ff07",
+            "request_id": "a5dc17bd-125d-40a1-a8d7-15893e4c8047",
+            "parent": null,
+            "provider": "offline",
+            "model": "qwen2.5:3b",
+            "status": "error",
+            "fallback": 0,
+            "retries": 0,
+            "usage": null,
+            "cost": null,
+            "http_status": 503,
+            "timestamp": "2026-11-13T18:18:56.731804106Z"
+          }
+        },
+        {
+          "kind": "fault",
+          "at": 57.422,
+          "data": {
+            "profile": "model-outage",
+            "request_id": "a5dc17bd-125d-40a1-a8d7-15893e4c8047",
+            "evidence": "Controlled primary returned HTTP 503"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 57.427,
+          "data": {
+            "id": "4e9333a8-e2a5-467d-a380-69f7580e573f",
+            "request_id": "a5dc17bd-125d-40a1-a8d7-15893e4c8047",
+            "parent": "d7211ee2-497d-4aea-b2ab-4508d4f8ff07",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "status": "success",
+            "fallback": 1,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 925,
+              "completion_tokens": 326,
+              "total_tokens": 1251
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:18:56.736156576Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 57.433,
+          "data": {
+            "id": "e5a8902d-cdd8-4ea2-bc62-341ef5e59c6e",
+            "request_id": "68507ad1-6198-409e-926a-ad8216b46b2e",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1311,
+              "completion_tokens": 317,
+              "total_tokens": 1628
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:19:14.822249538Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 57.441,
+          "data": {
+            "id": "e75cb9d7-fec5-4649-9da9-b5f164f6d21a",
+            "request_id": "1f94f798-72d8-4f9c-9618-027879f859d0",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1545,
+              "completion_tokens": 131,
+              "total_tokens": 1676
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:19:20.943671647Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 57.449,
+          "data": {
+            "id": "aa9ae869-6a31-40e1-a88d-113eac0511ff",
+            "request_id": "8ddba314-dc7d-43dc-ac81-76ff44970bf5",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1834,
+              "completion_tokens": 472,
+              "total_tokens": 2306
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:19:25.570813104Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 57.458,
+          "data": {
+            "id": "a7e78af2-0831-41ba-a2b4-734dca83cef8",
+            "request_id": "2eb79bc6-d03a-4280-a016-af958aa72e2f",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 2323,
+              "completion_tokens": 198,
+              "total_tokens": 2521
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:19:36.958862201Z"
+          }
+        }
+      ],
+      "metrics": {
+        "steps": 12,
+        "turns": 5,
+        "tool_calls": 7,
+        "shared_calls": 7,
+        "finish_calls": 0,
+        "failed_calls": 3,
+        "denied_calls": 0,
+        "provider_attempts": 6,
+        "usage_covered": 6,
+        "cost_covered": 6,
+        "known_tokens": 9382,
+        "tokens": 9382,
+        "known_cost": 0,
+        "cost": 0,
+        "cost_basis": "provider-reported or local-inference-fee-v1 (USD, excludes hosting and energy)",
+        "served": [
+          "ollama/qwen2.5:3b"
+        ],
+        "gateway_recovery": true
+      }
+    },
+    {
+      "id": "fd9831b085e94ae5bedc91235adfe775",
+      "experiment": "872775bdc32a4fc480a9c6a16332d224",
+      "agent": "smolagents",
+      "task": "uart",
+      "scenario": "model-outage",
+      "repetition": 1,
+      "queued": 1794593926.801586,
+      "status": "failed",
+      "versions": {
+        "local_model_digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+        "suite": "embedded-c/1.1",
+        "task": "1.1.0",
+        "task_sha256": "da1dbaf274017105c26b539d80ebc4e9758cd7491bc6bb896de8e0a2cdf83205",
+        "grader_sha256": "5efc2130a3638aa57bf2757a0bb758a01f73b25e27b252dc41f20f302b5a83aa",
+        "runner_sha256": "4f95fcb1ffa20907ccb3026ede2cab6b3c423dd3d6a48d27a49ad56c3e027ebd",
+        "gcc_image": "gcc:14.2.0-bookworm@sha256:b99b86a28812b1e6453a231a947dc43d76fe192788a12f344a9b568bf9f5d24c",
+        "gateway": "Bifrost v1.5.0 (bundled configuration)",
+        "inspect-ai": "0.3.200",
+        "smolagents": "1.22.0",
+        "python": "3.11.9",
+        "host": "Windows-10-10.0.26300-SP0"
+      },
+      "source": "#include \"firmware.h\"\n\nvoid feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n    p->used = 0;\np->used = p->used ? p->used : 0;\n        if (p->used == 0) {\n            if (bytes[i] == 0xA5) p->used = 1;\n        } else {\n            p->payload[p->used - 1] = bytes[i];\n            if (++p->used == 3) {\n                emit(p->payload[0], p->payload[1]);\n                p->used = 0;\n            }\n        }\n    }\n}\n",
+      "diff": "--- starter/firmware.c\n+++ candidate/firmware.c\n@@ -2,7 +2,7 @@\n \n void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n     p->used = 0;\n-    for (unsigned i = 0; i < count; ++i) {\n+p->used = p->used ? p->used : 0;\n         if (p->used == 0) {\n             if (bytes[i] == 0xA5) p->used = 1;\n         } else {\n",
+      "agent_seconds": 9.313,
+      "grader_seconds": 1.781,
+      "queue_seconds": 59.27770137786865,
+      "triggered": true,
+      "verifier": {
+        "pass": false,
+        "assertions": [
+          {
+            "name": "compile",
+            "scope": "build",
+            "pass": false,
+            "detail": "firmware.c: In function 'feed':\nfirmware.c:7:23: error: 'i' undeclared (first use in this function)\n    7 |             if (bytes[i] == 0xA5) p->used = 1;\n      |                       ^\nfirmware.c:7:23: note: each undeclared identifier is reported only once for each function it appears in\nfirmware.c:3:37: error: parameter 'bytes' set but not used [-Werror=unused-but-set-parameter]\n    3 | void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n      |                      ~~~~~~~~~~~~~~~^~~~~\nfirmware.c:3:53: error: unused parameter 'count' [-Werror=unused-parameter]\n    3 | void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n      |                                            ~~~~~~~~~^~~~~\nfirmware.c: At top level:\nfirmware.c:16:1: error: expected identifier or '(' before '}' token\n   16 | }\n      | ^\ncc1: all warnings being treated as errors\n"
+          }
+        ]
+      },
+      "reason": "",
+      "events": [
+        {
+          "kind": "decision",
+          "at": 4.904,
+          "data": {
+            "turn": 1,
+            "request_id": "c217d81d-df63-40cf-b5cf-da9f6010a450",
+            "requested": "offline/qwen2.5:3b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 7.312,
+          "data": {
+            "request_id": "c217d81d-df63-40cf-b5cf-da9f6010a450",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "usage": {
+              "prompt_tokens": 1857,
+              "completion_tokens": 54,
+              "total_tokens": 1911
+            },
+            "response_id": "chatcmpl-864",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 7.35,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 5,
+              "code": "p->used = p->used ? p->used : 0;"
+            },
+            "output": "Updated firmware.c."
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 7.38,
+          "data": {
+            "turn": 2,
+            "request_id": "8a7b7fb2-7f39-4d0b-a140-64c25d62cc94",
+            "requested": "ollama/qwen2.5:3b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 7.757,
+          "data": {
+            "request_id": "8a7b7fb2-7f39-4d0b-a140-64c25d62cc94",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "usage": {
+              "prompt_tokens": 1935,
+              "completion_tokens": 3,
+              "total_tokens": 1938
+            },
+            "response_id": "chatcmpl-469",
+            "tools_requested": []
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 7.769,
+          "data": {
+            "turn": 3,
+            "request_id": "b1f3d074-eb76-4892-8e4f-f09fdc448820",
+            "requested": "ollama/qwen2.5:3b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 8.241,
+          "data": {
+            "request_id": "b1f3d074-eb76-4892-8e4f-f09fdc448820",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "usage": {
+              "prompt_tokens": 1993,
+              "completion_tokens": 3,
+              "total_tokens": 1996
+            },
+            "response_id": "chatcmpl-51",
+            "tools_requested": []
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 8.291,
+          "data": {
+            "turn": 4,
+            "request_id": "ad8347fa-ee4c-4db8-b95c-364a6afb4326",
+            "requested": "ollama/qwen2.5:3b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 8.729,
+          "data": {
+            "request_id": "ad8347fa-ee4c-4db8-b95c-364a6afb4326",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "usage": {
+              "prompt_tokens": 2051,
+              "completion_tokens": 3,
+              "total_tokens": 2054
+            },
+            "response_id": "chatcmpl-526",
+            "tools_requested": []
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 8.771,
+          "data": {
+            "turn": 5,
+            "request_id": "bf825b54-296d-4a82-be8f-447116345499",
+            "requested": "ollama/qwen2.5:3b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 9.15,
+          "data": {
+            "request_id": "bf825b54-296d-4a82-be8f-447116345499",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "usage": {
+              "prompt_tokens": 2109,
+              "completion_tokens": 3,
+              "total_tokens": 2112
+            },
+            "response_id": "chatcmpl-451",
+            "tools_requested": []
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 9.759,
+          "data": {
+            "id": "afcce2bf-dc3c-4851-9524-04a77b43ef47",
+            "request_id": "c217d81d-df63-40cf-b5cf-da9f6010a450",
+            "parent": null,
+            "provider": "offline",
+            "model": "qwen2.5:3b",
+            "status": "error",
+            "fallback": 0,
+            "retries": 0,
+            "usage": null,
+            "cost": null,
+            "http_status": 503,
+            "timestamp": "2026-11-13T18:19:50.989791173Z"
+          }
+        },
+        {
+          "kind": "fault",
+          "at": 9.77,
+          "data": {
+            "profile": "model-outage",
+            "request_id": "c217d81d-df63-40cf-b5cf-da9f6010a450",
+            "evidence": "Controlled primary returned HTTP 503"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 9.78,
+          "data": {
+            "id": "632676fd-fd5a-4ea9-85d0-77f837dfdeff",
+            "request_id": "c217d81d-df63-40cf-b5cf-da9f6010a450",
+            "parent": "afcce2bf-dc3c-4851-9524-04a77b43ef47",
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "status": "success",
+            "fallback": 1,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1857,
+              "completion_tokens": 54,
+              "total_tokens": 1911
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:19:50.991710816Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 9.79,
+          "data": {
+            "id": "9eaa7cb6-1c74-4aad-9ba0-18bef2cee455",
+            "request_id": "8a7b7fb2-7f39-4d0b-a140-64c25d62cc94",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1935,
+              "completion_tokens": 3,
+              "total_tokens": 1938
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:19:53.470784466Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 9.799,
+          "data": {
+            "id": "0acaad02-8f47-4776-998d-1f53a06d6a4c",
+            "request_id": "b1f3d074-eb76-4892-8e4f-f09fdc448820",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1993,
+              "completion_tokens": 3,
+              "total_tokens": 1996
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:19:53.877115561Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 9.808,
+          "data": {
+            "id": "04ae75a7-e202-45dd-932c-7be4e40936e2",
+            "request_id": "ad8347fa-ee4c-4db8-b95c-364a6afb4326",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 2051,
+              "completion_tokens": 3,
+              "total_tokens": 2054
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:19:54.384827212Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 9.817,
+          "data": {
+            "id": "b632c2f4-34b3-420a-ad80-7c6602d2ed99",
+            "request_id": "bf825b54-296d-4a82-be8f-447116345499",
+            "parent": null,
+            "provider": "ollama",
+            "model": "qwen2.5:3b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 2109,
+              "completion_tokens": 3,
+              "total_tokens": 2112
+            },
+            "cost": null,
+            "http_status": null,
+            "timestamp": "2026-11-13T18:19:54.88234795Z"
+          }
+        }
+      ],
+      "metrics": {
+        "steps": 6,
+        "turns": 5,
+        "tool_calls": 1,
+        "shared_calls": 1,
+        "finish_calls": 0,
+        "failed_calls": 0,
+        "denied_calls": 0,
+        "provider_attempts": 6,
+        "usage_covered": 6,
+        "cost_covered": 6,
+        "known_tokens": 10011,
+        "tokens": 10011,
+        "known_cost": 0,
+        "cost": 0,
+        "cost_basis": "provider-reported or local-inference-fee-v1 (USD, excludes hosting and energy)",
+        "served": [
+          "ollama/qwen2.5:3b"
+        ],
+        "gateway_recovery": true
+      }
+    }
+  ],
+  "comparison": [
+    {
+      "agent": "inspect",
+      "task": "uart",
+      "scenario": "model-outage",
+      "scheduled": 1,
+      "valid": 1,
+      "passed": 0,
+      "invalid": 0,
+      "triggered": 1,
+      "recovered": 0,
+      "cost_per_success": null,
+      "cost_total": 0,
+      "mean_seconds": 56.437,
+      "ids": [
+        "95a32b007c674490b7ff425cd4644df9"
+      ]
+    },
+    {
+      "agent": "smolagents",
+      "task": "uart",
+      "scenario": "model-outage",
+      "scheduled": 1,
+      "valid": 1,
+      "passed": 0,
+      "invalid": 0,
+      "triggered": 1,
+      "recovered": 0,
+      "cost_per_success": null,
+      "cost_total": 0,
+      "mean_seconds": 9.313,
+      "ids": [
+        "fd9831b085e94ae5bedc91235adfe775"
+      ]
+    }
+  ]
+}

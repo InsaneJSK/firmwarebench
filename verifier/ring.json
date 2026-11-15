@@ -1,0 +1,12 @@
+[
+  {
+    "name": "wrap twice and drain",
+    "input": "+11\n+12\n+13\n+14\n+15\n+16\n+17\n-\n-\n-\n-\n-\n",
+    "expected": "14\n15\n16\n17\n-1\n"
+  },
+  {
+    "name": "interleaved full and refill",
+    "input": "+0\n+255\n+8\n-\n+2\n+9\n+7\n-\n-\n-\n-\n-\n",
+    "expected": "0\n8\n2\n9\n7\n-1\n"
+  }
+]

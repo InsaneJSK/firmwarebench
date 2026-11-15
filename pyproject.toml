@@ -1,0 +1,17 @@
+[project]
+name = "firmwarebench"
+version = "0.1.0"
+description = "A local evidence workbench for embedded C repair agents"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "inspect-ai==0.3.200",
+    "openai==2.26.0",
+    "smolagents[openai]==1.22.0",
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.34,<1",
+]
+
+[tool.uv]
+package = false
+
+

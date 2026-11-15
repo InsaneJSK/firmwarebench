@@ -1,0 +1,20 @@
+{
+  "title": "UART recovery pilot",
+  "agents": [
+    "inspect",
+    "smolagents"
+  ],
+  "suite": "embedded-c/1",
+  "tasks": [
+    "uart"
+  ],
+  "scenarios": [
+    "broken-tool",
+    "model-outage"
+  ],
+  "route": "ollama/qwen2.5:3b",
+  "repeats": 1,
+  "turn_limit": 4,
+  "tool_limit": 8,
+  "seconds": 90
+}

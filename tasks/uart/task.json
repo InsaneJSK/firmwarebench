@@ -1,0 +1,23 @@
+{
+  "name": "UART telemetry parser",
+  "version": "1.0.0",
+  "issue": "Preserve parser state across every serial read, including empty reads. Skip noise before sync (A5). After sync consume exactly two payload bytes, even when either equals A5. Emit channel and value once per complete frame. Keep the existing API.",
+  "obsolete": "Legacy bench note: reset the parser at every read boundary to avoid stale frames.",
+  "public": [
+    {
+      "name": "whole frame",
+      "input": "a50309\n",
+      "expected": "3,9 |\n"
+    },
+    {
+      "name": "split payload",
+      "input": "a503\n09\n",
+      "expected": "|\n3,9 |\n"
+    },
+    {
+      "name": "noise",
+      "input": "ff00\n",
+      "expected": "|\n"
+    }
+  ]
+}

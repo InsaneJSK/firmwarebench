@@ -1,0 +1,19 @@
+{
+  "title": "UART model outage · Qwen2.5 7B",
+  "agents": [
+    "inspect",
+    "smolagents"
+  ],
+  "suite": "embedded-c/1",
+  "tasks": [
+    "uart"
+  ],
+  "scenarios": [
+    "model-outage"
+  ],
+  "route": "ollama/qwen2.5:7b",
+  "repeats": 1,
+  "turn_limit": 6,
+  "tool_limit": 12,
+  "seconds": 180
+}

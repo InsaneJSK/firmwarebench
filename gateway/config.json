@@ -1,0 +1,46 @@
+{
+  "client": {
+    "enable_logging": true
+  },
+  "providers": {
+    "ollama": {
+      "keys": [
+        {
+          "name": "local",
+          "value": "local",
+          "models": [
+            "*"
+          ],
+          "weight": 1,
+          "ollama_key_config": {
+            "url": "http://host.docker.internal:11434"
+          }
+        }
+      ],
+      "network_config": {
+        "base_url": "http://host.docker.internal:11434",
+        "max_retries": 0,
+        "default_request_timeout_in_seconds": 180
+      }
+    },
+    "offline": {
+      "keys": [
+        {
+          "name": "fixture",
+          "value": "fixture",
+          "weight": 1,
+          "models": [
+            "*"
+          ]
+        }
+      ],
+      "network_config": {
+        "base_url": "http://offline:8080",
+        "max_retries": 0
+      },
+      "custom_provider_config": {
+        "base_provider_type": "openai"
+      }
+    }
+  }
+}

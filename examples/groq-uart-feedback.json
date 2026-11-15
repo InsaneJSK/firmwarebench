@@ -1,0 +1,768 @@
+{
+  "schema": "firmwarebench.experiment.v1",
+  "id": "ba40f4457d2e428d93feb18f4c902892",
+  "created": 1794599192.1686547,
+  "config": {
+    "title": "Groq GPT-OSS-20B UART outage with numbered edit feedback",
+    "agents": [
+      "inspect",
+      "smolagents"
+    ],
+    "suite": "embedded-c/1",
+    "tasks": [
+      "uart"
+    ],
+    "scenarios": [
+      "model-outage"
+    ],
+    "route": "groq/openai/gpt-oss-20b",
+    "repeats": 1,
+    "turn_limit": 4,
+    "tool_limit": 8,
+    "seconds": 300,
+    "show_edit_feedback": true
+  },
+  "trials": [
+    {
+      "id": "80d53d0aceb64fa681c19f2217262817",
+      "experiment": "ba40f4457d2e428d93feb18f4c902892",
+      "agent": "inspect",
+      "task": "uart",
+      "scenario": "model-outage",
+      "repetition": 1,
+      "queued": 1794599192.1686547,
+      "status": "passed",
+      "versions": {
+        "local_model_digest": null,
+        "suite": "embedded-c/1",
+        "task": "1.0.0",
+        "task_sha256": "e8229d17843a8cf0c258fb5a7b004e711553f38456bc0e9996c51653c1144c31",
+        "grader_sha256": "5efc2130a3638aa57bf2757a0bb758a01f73b25e27b252dc41f20f302b5a83aa",
+        "runner_sha256": "b5428d06ef926fa005b270b915f1ce4267b21d3136ced26abc9eb36ce7817211",
+        "gcc_image": "gcc:14.2.0-bookworm@sha256:b99b86a28812b1e6453a231a947dc43d76fe192788a12f344a9b568bf9f5d24c",
+        "gateway": "Bifrost v1.5.0 (bundled configuration)",
+        "inspect-ai": "0.3.200",
+        "smolagents": "1.22.0",
+        "python": "3.11.9",
+        "host": "Windows-10-10.0.26300-SP0"
+      },
+      "source": "#include \"firmware.h\"\n\nvoid feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n    for (unsigned i = 0; i < count; ++i) {\n        if (p->used == 0) {\n            if (bytes[i] == 0xA5) p->used = 1;\n        } else {\n            p->payload[p->used - 1] = bytes[i];\n            if (++p->used == 3) {\n                emit(p->payload[0], p->payload[1]);\n                p->used = 0;\n            }\n        }\n    }\n}\n",
+      "diff": "--- starter/firmware.c\n+++ candidate/firmware.c\n@@ -1,7 +1,6 @@\n #include \"firmware.h\"\n \n void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n-    p->used = 0;\n     for (unsigned i = 0; i < count; ++i) {\n         if (p->used == 0) {\n             if (bytes[i] == 0xA5) p->used = 1;\n",
+      "agent_seconds": 75.391,
+      "grader_seconds": 3.532,
+      "queue_seconds": 0.013574838638305664,
+      "triggered": true,
+      "verifier": {
+        "pass": true,
+        "assertions": [
+          {
+            "name": "compile",
+            "scope": "build",
+            "pass": true,
+            "detail": ""
+          },
+          {
+            "name": "whole frame",
+            "scope": "public",
+            "pass": true,
+            "expected": "3,9 |\n",
+            "actual": "3,9 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "split payload",
+            "scope": "public",
+            "pass": true,
+            "expected": "|\n3,9 |\n",
+            "actual": "|\n3,9 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "noise",
+            "scope": "public",
+            "pass": true,
+            "expected": "|\n",
+            "actual": "|\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "every byte split with idle reads",
+            "scope": "reserved",
+            "pass": true,
+            "expected": "|\n|\n|\n|\n5,6 |\n",
+            "actual": "|\n|\n|\n|\n5,6 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "sync in payload and adjacent frames",
+            "scope": "reserved",
+            "pass": true,
+            "expected": "165,165 0,255 |\n",
+            "actual": "165,165 0,255 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "adjacent split frames",
+            "scope": "reserved",
+            "pass": true,
+            "expected": "9,3 |\n0,5 |\n255,0 |\n",
+            "actual": "9,3 |\n0,5 |\n255,0 |\n",
+            "exit": 0,
+            "detail": ""
+          }
+        ]
+      },
+      "reason": "",
+      "events": [
+        {
+          "kind": "decision",
+          "at": 13.559,
+          "data": {
+            "turn": 1,
+            "request_id": "79ec83a5-b26d-4b1e-b4e3-8dc11567e18e",
+            "requested": "offline/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "response",
+          "at": 15.012,
+          "data": {
+            "request_id": "79ec83a5-b26d-4b1e-b4e3-8dc11567e18e",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 812,
+              "prompt_tokens_details": {
+                "cached_read_tokens": 512,
+                "cached_tokens": 512
+              },
+              "completion_tokens": 313,
+              "completion_tokens_details": {
+                "reasoning_tokens": 286
+              },
+              "total_tokens": 1125
+            },
+            "response_id": "chatcmpl-c590b8f3-6463-4f40-a9c8-50dc0b28ab1f",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 15.311,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 4,
+              "code": ""
+            },
+            "output": "Updated firmware.c.\n1: #include \"firmware.h\"\n2: \n3: void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n4:     for (unsigned i = 0; i < count; ++i) {\n5:         if (p->used == 0) {\n6:             if (bytes[i] == 0xA5) p->used = 1;\n7:         } else {\n8:             p->payload[p->used - 1] = bytes[i];\n9:             if (++p->used == 3) {\n10:                 emit(p->payload[0], p->payload[1]);\n11:                 p->used = 0;\n12:             }\n13:         }\n14:     }\n15: }"
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 15.332,
+          "data": {
+            "turn": 2,
+            "request_id": "4fc97249-b346-4d75-a708-6919cceca38e",
+            "requested": "groq/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 43.577,
+          "data": {
+            "request_id": "4fc97249-b346-4d75-a708-6919cceca38e",
+            "seconds": 28.234
+          }
+        },
+        {
+          "kind": "response",
+          "at": 44.553,
+          "data": {
+            "request_id": "4fc97249-b346-4d75-a708-6919cceca38e",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 1011,
+              "completion_tokens": 436,
+              "completion_tokens_details": {
+                "reasoning_tokens": 416
+              },
+              "total_tokens": 1447
+            },
+            "response_id": "chatcmpl-9212cd96-f40a-498c-a576-c0bb56b0b71a",
+            "tools_requested": [
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 47.417,
+          "data": {
+            "name": "run_public_tests",
+            "status": "ok",
+            "arguments": {},
+            "output": "{\"pass\": true, \"assertions\": [{\"name\": \"compile\", \"scope\": \"build\", \"pass\": true, \"detail\": \"\"}, {\"name\": \"whole frame\", \"scope\": \"public\", \"pass\": true, \"expected\": \"3,9 |\\n\", \"actual\": \"3,9 |\\n\", \"exit\": 0, \"detail\": \"\"}, {\"name\": \"split payload\", \"scope\": \"public\", \"pass\": true, \"expected\": \"|\\n3,9 |\\n\", \"actual\": \"|\\n3,9 |\\n\", \"exit\": 0, \"detail\": \"\"}, {\"name\": \"noise\", \"scope\": \"public\", \"pass\": true, \"expected\": \"|\\n\", \"actual\": \"|\\n\", \"exit\": 0, \"detail\": \"\"}]}"
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 47.444,
+          "data": {
+            "turn": 3,
+            "request_id": "f1501c1a-3771-4f49-add4-a31c698a4be6",
+            "requested": "groq/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 73.578,
+          "data": {
+            "request_id": "f1501c1a-3771-4f49-add4-a31c698a4be6",
+            "seconds": 26.125
+          }
+        },
+        {
+          "kind": "response",
+          "at": 74.705,
+          "data": {
+            "request_id": "f1501c1a-3771-4f49-add4-a31c698a4be6",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 1210,
+              "completion_tokens": 529,
+              "completion_tokens_details": {
+                "reasoning_tokens": 453
+              },
+              "total_tokens": 1739
+            },
+            "response_id": "chatcmpl-bfe86259-5fec-46d3-84a2-948d7a39b12c",
+            "tools_requested": [
+              "submit"
+            ]
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 77.045,
+          "data": {
+            "id": "f9657caf-538b-4594-bac1-0dad1afde220",
+            "request_id": "79ec83a5-b26d-4b1e-b4e3-8dc11567e18e",
+            "parent": null,
+            "provider": "offline",
+            "model": "openai/gpt-oss-20b",
+            "status": "error",
+            "fallback": 0,
+            "retries": 0,
+            "usage": null,
+            "cost": null,
+            "http_status": 503,
+            "timestamp": "2026-11-13T19:46:45.787537223Z"
+          }
+        },
+        {
+          "kind": "fault",
+          "at": 77.057,
+          "data": {
+            "profile": "model-outage",
+            "request_id": "79ec83a5-b26d-4b1e-b4e3-8dc11567e18e",
+            "evidence": "Controlled primary returned HTTP 503"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 77.069,
+          "data": {
+            "id": "f79cfa50-1ded-4d11-9711-2e00d1e9adc2",
+            "request_id": "79ec83a5-b26d-4b1e-b4e3-8dc11567e18e",
+            "parent": "f9657caf-538b-4594-bac1-0dad1afde220",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 1,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 812,
+              "prompt_tokens_details": {
+                "cached_read_tokens": 512,
+                "cached_tokens": 512
+              },
+              "completion_tokens": 313,
+              "completion_tokens_details": {
+                "reasoning_tokens": 286
+              },
+              "total_tokens": 1125
+            },
+            "cost": 0.0001356,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:46:45.797902434Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 77.085,
+          "data": {
+            "id": "5b271d64-602e-43e0-8ea1-562d9914edd5",
+            "request_id": "4fc97249-b346-4d75-a708-6919cceca38e",
+            "parent": null,
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1011,
+              "completion_tokens": 436,
+              "completion_tokens_details": {
+                "reasoning_tokens": 416
+              },
+              "total_tokens": 1447
+            },
+            "cost": 0.000206625,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:47:15.789152063Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 77.106,
+          "data": {
+            "id": "90371cf9-0a6c-41e4-9ac9-ea3ae054f2c2",
+            "request_id": "f1501c1a-3771-4f49-add4-a31c698a4be6",
+            "parent": null,
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1210,
+              "completion_tokens": 529,
+              "completion_tokens_details": {
+                "reasoning_tokens": 453
+              },
+              "total_tokens": 1739
+            },
+            "cost": 0.00024944999999999996,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:47:45.782356758Z"
+          }
+        }
+      ],
+      "metrics": {
+        "steps": 6,
+        "turns": 3,
+        "tool_calls": 3,
+        "shared_calls": 2,
+        "finish_calls": 1,
+        "failed_calls": 0,
+        "denied_calls": 0,
+        "provider_attempts": 4,
+        "usage_covered": 4,
+        "cost_covered": 4,
+        "known_tokens": 4311,
+        "tokens": 4311,
+        "known_cost": 0.000591675,
+        "cost": 0.000591675,
+        "cost_basis": "provider-reported or local-inference-fee-v1 (USD, excludes hosting and energy)",
+        "served": [
+          "groq/openai/gpt-oss-20b"
+        ],
+        "gateway_recovery": true
+      }
+    },
+    {
+      "id": "753b4b9f6cc54196aaa6ee7e1b717983",
+      "experiment": "ba40f4457d2e428d93feb18f4c902892",
+      "agent": "smolagents",
+      "task": "uart",
+      "scenario": "model-outage",
+      "repetition": 1,
+      "queued": 1794599192.1686547,
+      "status": "invalid",
+      "versions": {
+        "local_model_digest": null,
+        "suite": "embedded-c/1",
+        "task": "1.0.0",
+        "task_sha256": "e8229d17843a8cf0c258fb5a7b004e711553f38456bc0e9996c51653c1144c31",
+        "grader_sha256": "5efc2130a3638aa57bf2757a0bb758a01f73b25e27b252dc41f20f302b5a83aa",
+        "runner_sha256": "b5428d06ef926fa005b270b915f1ce4267b21d3136ced26abc9eb36ce7817211",
+        "gcc_image": "gcc:14.2.0-bookworm@sha256:b99b86a28812b1e6453a231a947dc43d76fe192788a12f344a9b568bf9f5d24c",
+        "gateway": "Bifrost v1.5.0 (bundled configuration)",
+        "inspect-ai": "0.3.200",
+        "smolagents": "1.22.0",
+        "python": "3.11.9",
+        "host": "Windows-10-10.0.26300-SP0"
+      },
+      "source": "#include \"firmware.h\"\n\nvoid feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n    // p->used = 0;\n    for (unsigned i = 0; i < count; ++i) {\n        if (p->used == 0) {\n            if (bytes[i] == 0xA5) p->used = 1;\n        } else {\n            p->payload[p->used - 1] = bytes[i];\n            if (++p->used == 3) {\n                emit(p->payload[0], p->payload[1]);\n                p->used = 0;\n            }\n        }\n    }\n}\n",
+      "diff": "--- starter/firmware.c\n+++ candidate/firmware.c\n@@ -1,7 +1,7 @@\n #include \"firmware.h\"\n \n void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n-    p->used = 0;\n+    // p->used = 0;\n     for (unsigned i = 0; i < count; ++i) {\n         if (p->used == 0) {\n             if (bytes[i] == 0xA5) p->used = 1;\n",
+      "agent_seconds": 84.344,
+      "grader_seconds": 3.656,
+      "queue_seconds": 80.69179201126099,
+      "triggered": true,
+      "verifier": {
+        "pass": true,
+        "assertions": [
+          {
+            "name": "compile",
+            "scope": "build",
+            "pass": true,
+            "detail": ""
+          },
+          {
+            "name": "whole frame",
+            "scope": "public",
+            "pass": true,
+            "expected": "3,9 |\n",
+            "actual": "3,9 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "split payload",
+            "scope": "public",
+            "pass": true,
+            "expected": "|\n3,9 |\n",
+            "actual": "|\n3,9 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "noise",
+            "scope": "public",
+            "pass": true,
+            "expected": "|\n",
+            "actual": "|\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "every byte split with idle reads",
+            "scope": "reserved",
+            "pass": true,
+            "expected": "|\n|\n|\n|\n5,6 |\n",
+            "actual": "|\n|\n|\n|\n5,6 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "sync in payload and adjacent frames",
+            "scope": "reserved",
+            "pass": true,
+            "expected": "165,165 0,255 |\n",
+            "actual": "165,165 0,255 |\n",
+            "exit": 0,
+            "detail": ""
+          },
+          {
+            "name": "adjacent split frames",
+            "scope": "reserved",
+            "pass": true,
+            "expected": "9,3 |\n0,5 |\n255,0 |\n",
+            "actual": "9,3 |\n0,5 |\n255,0 |\n",
+            "exit": 0,
+            "detail": ""
+          }
+        ]
+      },
+      "reason": "Gateway returned 400. {\"is_bifrost_error\":false,\"status_code\":400,\"error\":{\"type\":\"invalid_request_error\",\"code\":\"tool_use_failed\",\"message\":\"Tool choice is required, but model did not call a tool\"},\"extra_fields\":{\"provider\":\"groq\",\"original_model_requested\":\"openai/gpt-oss-20b\",\"resolved_model_used\":\"openai/gpt-oss-20b\",\"request_type\":\"chat_completion\"}}\n",
+      "events": [
+        {
+          "kind": "decision",
+          "at": 6.485,
+          "data": {
+            "turn": 1,
+            "request_id": "7b902f0f-7a27-49da-93be-f35cb8fd8507",
+            "requested": "offline/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 22.903,
+          "data": {
+            "request_id": "7b902f0f-7a27-49da-93be-f35cb8fd8507",
+            "seconds": 16.406
+          }
+        },
+        {
+          "kind": "response",
+          "at": 23.573,
+          "data": {
+            "request_id": "7b902f0f-7a27-49da-93be-f35cb8fd8507",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 1681,
+              "completion_tokens": 221,
+              "completion_tokens_details": {
+                "reasoning_tokens": 186
+              },
+              "total_tokens": 1902
+            },
+            "response_id": "chatcmpl-001b1a3b-2a25-438b-874d-ecde14fc014d",
+            "tools_requested": [
+              "edit_line"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 23.636,
+          "data": {
+            "name": "edit_line",
+            "status": "ok",
+            "arguments": {
+              "line": 4,
+              "code": "    // p->used = 0;"
+            },
+            "output": "Updated firmware.c.\n1: #include \"firmware.h\"\n2: \n3: void feed(Parser *p, const uint8_t *bytes, unsigned count, Emit emit) {\n4:     // p->used = 0;\n5:     for (unsigned i = 0; i < count; ++i) {\n6:         if (p->used == 0) {\n7:             if (bytes[i] == 0xA5) p->used = 1;\n8:         } else {\n9:             p->payload[p->used - 1] = bytes[i];\n10:             if (++p->used == 3) {\n11:                 emit(p->payload[0], p->payload[1]);\n12:                 p->used = 0;\n13:             }\n14:         }\n15:     }\n16: }"
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 23.656,
+          "data": {
+            "turn": 2,
+            "request_id": "a2d9b17d-002f-4a4b-a9e8-e89cd53d8e82",
+            "requested": "groq/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 52.901,
+          "data": {
+            "request_id": "a2d9b17d-002f-4a4b-a9e8-e89cd53d8e82",
+            "seconds": 29.234
+          }
+        },
+        {
+          "kind": "response",
+          "at": 54.541,
+          "data": {
+            "request_id": "a2d9b17d-002f-4a4b-a9e8-e89cd53d8e82",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "usage": {
+              "prompt_tokens": 1946,
+              "completion_tokens": 205,
+              "completion_tokens_details": {
+                "reasoning_tokens": 185
+              },
+              "total_tokens": 2151
+            },
+            "response_id": "chatcmpl-3f1828a8-1edc-4bcf-80bc-dd2f7c3320fe",
+            "tools_requested": [
+              "run_public_tests"
+            ]
+          }
+        },
+        {
+          "kind": "tool",
+          "at": 57.319,
+          "data": {
+            "name": "run_public_tests",
+            "status": "ok",
+            "arguments": {},
+            "output": "{\"pass\": true, \"assertions\": [{\"name\": \"compile\", \"scope\": \"build\", \"pass\": true, \"detail\": \"\"}, {\"name\": \"whole frame\", \"scope\": \"public\", \"pass\": true, \"expected\": \"3,9 |\\n\", \"actual\": \"3,9 |\\n\", \"exit\": 0, \"detail\": \"\"}, {\"name\": \"split payload\", \"scope\": \"public\", \"pass\": true, \"expected\": \"|\\n3,9 |\\n\", \"actual\": \"|\\n3,9 |\\n\", \"exit\": 0, \"detail\": \"\"}, {\"name\": \"noise\", \"scope\": \"public\", \"pass\": true, \"expected\": \"|\\n\", \"actual\": \"|\\n\", \"exit\": 0, \"detail\": \"\"}]}"
+          }
+        },
+        {
+          "kind": "decision",
+          "at": 57.343,
+          "data": {
+            "turn": 3,
+            "request_id": "e6f67267-a213-4f58-871d-bc12026d2cce",
+            "requested": "groq/openai/gpt-oss-20b"
+          }
+        },
+        {
+          "kind": "pacing",
+          "at": 82.898,
+          "data": {
+            "request_id": "e6f67267-a213-4f58-871d-bc12026d2cce",
+            "seconds": 25.546
+          }
+        },
+        {
+          "kind": "model_error",
+          "at": 83.86,
+          "data": {
+            "request_id": "e6f67267-a213-4f58-871d-bc12026d2cce",
+            "status": 400,
+            "detail": "{\"is_bifrost_error\":false,\"status_code\":400,\"error\":{\"type\":\"invalid_request_error\",\"code\":\"tool_use_failed\",\"message\":\"Tool choice is required, but model did not call a tool\"},\"extra_fields\":{\"provider\":\"groq\",\"original_model_requested\":\"openai/gpt-oss-20b\",\"resolved_model_used\":\"openai/gpt-oss-20b\",\"request_type\":\"chat_completion\"}}\n"
+          }
+        },
+        {
+          "kind": "adapter_exit",
+          "at": 84.366,
+          "data": {
+            "code": 1,
+            "detail": "Error code: 400 - {'error': {'message': '{\"is_bifrost_error\":false,\"status_code\":400,\"error\":{\"type\":\"invalid_request_error\",\"code\":\"tool_use_failed\",\"message\":\"Tool choice is required, but model did not call a tool\"},\"extra_fields\":{\"provider\":\"groq\",\"original_model_requested\":\"openai/gpt-oss-20b\",\"resolved_model_used\":\"openai/gpt-oss-20b\",\"request_type\":\"chat_completion\"}}\\n'}}"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 89.099,
+          "data": {
+            "id": "5f76a8dd-e75d-4c04-b068-2898f3763fef",
+            "request_id": "7b902f0f-7a27-49da-93be-f35cb8fd8507",
+            "parent": null,
+            "provider": "offline",
+            "model": "openai/gpt-oss-20b",
+            "status": "error",
+            "fallback": 0,
+            "retries": 0,
+            "usage": null,
+            "cost": null,
+            "http_status": 503,
+            "timestamp": "2026-11-13T19:48:15.800969879Z"
+          }
+        },
+        {
+          "kind": "fault",
+          "at": 89.113,
+          "data": {
+            "profile": "model-outage",
+            "request_id": "7b902f0f-7a27-49da-93be-f35cb8fd8507",
+            "evidence": "Controlled primary returned HTTP 503"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 89.126,
+          "data": {
+            "id": "413ff43a-373c-43f7-8a76-14549911abbf",
+            "request_id": "7b902f0f-7a27-49da-93be-f35cb8fd8507",
+            "parent": "5f76a8dd-e75d-4c04-b068-2898f3763fef",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 1,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1681,
+              "completion_tokens": 221,
+              "completion_tokens_details": {
+                "reasoning_tokens": 186
+              },
+              "total_tokens": 1902
+            },
+            "cost": 0.000192375,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:48:15.805960613Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 89.139,
+          "data": {
+            "id": "cc9e5e41-4a89-4d9e-9a33-084cac7410a0",
+            "request_id": "a2d9b17d-002f-4a4b-a9e8-e89cd53d8e82",
+            "parent": null,
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "success",
+            "fallback": 0,
+            "retries": 0,
+            "usage": {
+              "prompt_tokens": 1946,
+              "completion_tokens": 205,
+              "completion_tokens_details": {
+                "reasoning_tokens": 185
+              },
+              "total_tokens": 2151
+            },
+            "cost": 0.00020744999999999997,
+            "http_status": null,
+            "timestamp": "2026-11-13T19:48:45.782925508Z"
+          }
+        },
+        {
+          "kind": "gateway",
+          "at": 89.156,
+          "data": {
+            "id": "1bfd1da3-da6d-4226-b5e4-6a537e8ce353",
+            "request_id": "e6f67267-a213-4f58-871d-bc12026d2cce",
+            "parent": null,
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
+            "status": "error",
+            "fallback": 0,
+            "retries": 0,
+            "usage": null,
+            "cost": null,
+            "http_status": 400,
+            "timestamp": "2026-11-13T19:49:15.7782674Z"
+          }
+        }
+      ],
+      "metrics": {
+        "steps": 5,
+        "turns": 3,
+        "tool_calls": 2,
+        "shared_calls": 2,
+        "finish_calls": 0,
+        "failed_calls": 0,
+        "denied_calls": 0,
+        "provider_attempts": 4,
+        "usage_covered": 3,
+        "cost_covered": 3,
+        "known_tokens": 4053,
+        "tokens": null,
+        "known_cost": 0.000399825,
+        "cost": null,
+        "cost_basis": "provider-reported or local-inference-fee-v1 (USD, excludes hosting and energy)",
+        "served": [
+          "groq/openai/gpt-oss-20b"
+        ],
+        "gateway_recovery": true
+      }
+    }
+  ],
+  "comparison": [
+    {
+      "agent": "inspect",
+      "task": "uart",
+      "scenario": "model-outage",
+      "scheduled": 1,
+      "valid": 1,
+      "passed": 1,
+      "invalid": 0,
+      "triggered": 1,
+      "recovered": 1,
+      "cost_per_success": 0.000591675,
+      "cost_total": 0.000591675,
+      "mean_seconds": 75.391,
+      "ids": [
+        "80d53d0aceb64fa681c19f2217262817"
+      ]
+    },
+    {
+      "agent": "smolagents",
+      "task": "uart",
+      "scenario": "model-outage",
+      "scheduled": 1,
+      "valid": 0,
+      "passed": 0,
+      "invalid": 1,
+      "triggered": 0,
+      "recovered": 0,
+      "cost_per_success": null,
+      "cost_total": null,
+      "mean_seconds": 84.344,
+      "ids": [
+        "753b4b9f6cc54196aaa6ee7e1b717983"
+      ]
+    }
+  ]
+}

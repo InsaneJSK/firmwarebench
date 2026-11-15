@@ -1,0 +1,42 @@
+{
+  "client": {
+    "enable_logging": true
+  },
+  "providers": {
+    "groq": {
+      "keys": [
+        {
+          "name": "groq-free",
+          "value": "env.GROQ_API_KEY",
+          "models": [
+            "openai/gpt-oss-20b"
+          ],
+          "weight": 1
+        }
+      ],
+      "network_config": {
+        "max_retries": 0,
+        "default_request_timeout_in_seconds": 120
+      }
+    },
+    "offline": {
+      "keys": [
+        {
+          "name": "fixture",
+          "value": "fixture",
+          "weight": 1,
+          "models": [
+            "*"
+          ]
+        }
+      ],
+      "network_config": {
+        "base_url": "http://offline:8080",
+        "max_retries": 0
+      },
+      "custom_provider_config": {
+        "base_provider_type": "openai"
+      }
+    }
+  }
+}
